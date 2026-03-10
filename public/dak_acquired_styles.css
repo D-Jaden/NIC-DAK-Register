@@ -93,7 +93,7 @@ body {
 }
 
 .header {
-    background: linear-gradient(135deg, #2c3e50 100%, #34495ed3  0%);
+    background: linear-gradient(135deg, #2c3e50 100%, #34495ed3 0%); border-bottom: 1px solid #162432;
     color: white;
     padding: 20px;
     text-align: center;
@@ -139,7 +139,7 @@ body {
 
 /* Main features container */
 .features {
-    background-color: #e2eefdf9;
+    background-color: #fffffff9;
     width: 880px;
     height: 90px;
     border-radius: 5px;
@@ -163,7 +163,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid #ccc;
+    border: 1px solid #e1e8ed;
     border-radius: 5px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -178,7 +178,7 @@ body {
     height: 38px;
     width: 237px;
     background: white;
-    color: #000000;
+    color: rgb(0, 0, 0);
     border-color: rgb(33, 192, 12);
     outline: none;
     border-radius: 5px;
@@ -188,7 +188,7 @@ body {
 }
 
 .instr:hover {
-    background-color: #f3f3f3f9;
+    background-color: #f1f5f9;
     color: rgb(0, 0, 0);
 }
 
@@ -199,6 +199,7 @@ body {
     height: 40px;
     width: 152px;
     background-color: #fffffff9;
+    color: rgb(0, 0, 0);
     color: rgb(0, 0, 0);
     border-color: rgb(149, 189, 226);
     border-radius: 5px;
@@ -217,6 +218,7 @@ body {
     height: 40px;
     width: 80px;
     background-color: #fffffff9;
+    color: rgb(0, 0, 0);
     color: rgb(0, 0, 0);
     border-color: rgb(149, 189, 226);
     border-radius: 5px;
@@ -291,13 +293,14 @@ body {
     width: 33px;
     background-color: #fffffff9;
     color: rgb(0, 0, 0);
-    border-color: rgb(0, 0, 0);
+    color: rgb(0, 0, 0);
+    border-color: white;
     border-radius: 5px;
     outline: none;
 }
 
 .bold-btn:hover {
-    background-color: black;
+    background-color: rgb(0, 0, 0);
     color: white;
 }
 
@@ -311,7 +314,8 @@ body {
     width: 33px;
     background-color: #fffffff9;
     color: rgb(0, 0, 0);
-    border-color: rgb(0, 0, 0);
+    color: rgb(0, 0, 0);
+    border-color: white;
     border-radius: 5px;
     outline: none;
 }
@@ -330,7 +334,8 @@ body {
     width: 33px;
     background-color: #fffffff9;
     color: rgb(0, 0, 0);
-    border-color: rgb(0, 0, 0);
+    color: rgb(0, 0, 0);
+    border-color: white;
     border-radius: 5px;
     outline: none;
 }
@@ -355,7 +360,7 @@ body {
 .find-box, .replace-box {
     padding: 8px;
     font-size: 14px;
-    border: 2px solid #1468c7be;
+    border: 1px solid #1468c7be; background: white; color: black;
     border-radius: 5px;
     outline: none;
     width: 220px;
@@ -386,16 +391,16 @@ body {
     position: relative;
     left: 310px;
     top: -77px;
-    background-color: #ffffff;
+    background-color: #fffffff9;
     width: 70px;
     height: 78px;
     border-radius: 5px;
-    border: 2.23px solid #2195f39c;
+    border: 1px solid #e1e8ed;
     color: #2196f3;
 }
 .match-counter b {
     font-weight: bold;
-    color: black;
+    color: rgb(0, 0, 0);
     display: block;
     text-align: center;
     position: relative;
@@ -408,7 +413,7 @@ body {
     left: 29px;
     top: 5px;
     font-weight: bold;
-    color: black;
+    color: rgb(0, 0, 0);
     justify-content: center;
     align-items: center;
 }
@@ -472,7 +477,7 @@ body {
     right: 0;
     min-width: 160px;
     background: white;
-    border: 1px solid #ddd;
+    border: 1px solid #e1e8ed;
     border-radius: 4px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     z-index: 1000;
@@ -487,7 +492,7 @@ body {
     display: block;
     padding: 8px 12px;
     text-decoration: none;
-    color: #333;
+    color: rgb(0, 0, 0);
 }
 .dropdown-menu li a:hover {
     background: #f0f0f0;
@@ -659,8 +664,7 @@ body {
 }
 
 .excel-table th {
-    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
-    color: white;
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); color: white;
     padding: 15px 12px;
     text-align: left;
     font-weight: 600;
@@ -673,7 +677,7 @@ body {
 
 .excel-table th i {
     font-size: 1.2rem;
-    color: #ffffff;
+    color: white;
     position: relative;
     right: 10px;
     transform: translateY(-50%);
@@ -732,7 +736,7 @@ body {
     outline: none;
     font-size: 13px;
     font-family: 'Noto Sans Devanagari', 'Segoe UI', sans-serif;
-    background: #f8f9fa;
+    background: #e2eefdf9;
     cursor: pointer;
     transition: background-color 0.2s ease;
     display: block;
@@ -756,18 +760,19 @@ body {
 }
 
 .cell.editing, .hindi-cell.editing {
-    background: linear-gradient(135deg, #ffffd8 0%, #a0cfff 100%);
+    background: linear-gradient(135deg, #f8f9fa 0%, #cfe1f3 100%);
+    box-shadow: inset 0 0 0 2px #58a6ff;
     box-shadow: inset 0 0 0 2px #c0c5e7;
 }
 
 .row-number {
     background: linear-gradient(135deg, #f8f9fa 0%, #cfe1f3 100%);
     font-weight: 600;
-    color: #6c757d;
+    color: #666;
     text-align: center;
     width: 4%;
     min-width: 50px;
-    border-right: 2px solid #dee2e6;
+    border-right: 1px solid #2c3e50;
     vertical-align: middle;
 }
 
@@ -777,11 +782,11 @@ body {
 }
 
 .excel-table tr:nth-child(even) td:not(.row-number) {
-    background: #f8f9fa;
+    background: #e2eefdf9;
 }
 
 .excel-table tr:hover td {
-    background: linear-gradient(135deg, #e8f5e8 0%, #cfe1f3 100%);
+    background: linear-gradient(135deg, #f8f9fa 0%, #cfe1f3 100%);
 }
 
 .excel-table tr:hover td.row-number {
@@ -807,7 +812,7 @@ body {
 .sort-dropdown {
     position: fixed; 
     background: white;
-    border: 1px solid #ddd;
+    border: 1px solid #e1e8ed;
     border-radius: 4px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.2); 
     z-index: 99999; 
@@ -825,7 +830,7 @@ body {
     border-bottom: none;
 }
 .dropdown-header {
-    background: #f8f9fa;
+    background: #e2eefdf9;
     padding: 8px 12px;
     font-weight: bold;
     font-size: 12px;
@@ -835,7 +840,7 @@ body {
 .sort-option, .search-option {
     padding: 8px 12px;
     cursor: pointer;
-    color: #333;
+    color: rgb(0, 0, 0);
     font-size: 14px;
     transition: background-color 0.2s;
     display: flex;
@@ -843,7 +848,7 @@ body {
     gap: 8px;
 }
 .sort-option:hover, .search-option:hover {
-    background-color: #f5f5f5;
+    background-color: #f1f5f9;
 }
 .column-search-input {
     width: 100%;
@@ -867,7 +872,7 @@ body {
 .search-btn {
     flex: 1;
     padding: 4px 8px;
-    border: 1px solid #ddd;
+    border: 1px solid #e1e8ed;
     background: rgb(75, 151, 214);
     color: white;
     border-radius: 3px;
@@ -941,7 +946,7 @@ body {
     gap: 6px;
     font-size: 13px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #2c3e50;
+    color: rgb(0, 0, 0);
     cursor: pointer;
     height: 24px;
     min-height: 24px;
@@ -960,13 +965,13 @@ body {
 }
 
 .radio-label:hover {
-    background-color: #e8f4fd;
+    background-color: #f1f5f9;
 }
 
 .radio-label input[type="radio"] {
     width: 14px;
     height: 14px;
-    accent-color: #2577ad;
+    accent-color: #1a5276;
     cursor: pointer;
     flex-shrink: 0;
     min-width: 14px;
@@ -978,7 +983,7 @@ body {
 
 /* Checked state - NO font-weight change! */
 .radio-label:has(input[type="radio"]:checked) {
-    background-color: #d6eaf8;
+    background-color: #f1f5f9; border-left-color: #1a5276;
     color: #1a5276;
     font-weight: 400; /* Keep same weight to prevent shift */
     border-left-color: #2577ad;
@@ -1008,7 +1013,7 @@ body {
 
 .context-menu {
     background: white;
-    border: 1px solid #ccc;
+    border: 1px solid #e1e8ed;
     border-radius: 4px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     padding: 4px 0;
@@ -1024,7 +1029,7 @@ body {
 }
 
 .context-menu-item:hover {
-    background-color: #f0f0f0;
+    background-color: #f1f5f9;
 }
 
 .context-menu-item[data-action="delete-row"] {
@@ -1036,7 +1041,7 @@ body {
 }
 
 .excel-table tbody tr:hover {
-    background-color: #f8f9fa;
+    background-color: #fffffff9;
 }
 
 .excel-table tbody tr {
@@ -1295,7 +1300,7 @@ body {
         width: auto;
         height: auto;
         background-color: white;
-        border: 1px solid #ddd;
+        border: 1px solid #e1e8ed;
         border-radius: 8px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.15);
         z-index: 1000;
@@ -1341,8 +1346,9 @@ body {
         gap: 8px;
     }
     .find-box, .replace-box {
-        width: 100%;
-        gap:5px;
+        width: 140px;
+        height: 35px;
+        border: 1px solid #1468c7be; background: white; color: black;
     }
     .find-btn, .replace-btn {
         width: 100%;
