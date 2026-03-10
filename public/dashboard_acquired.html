@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acquired Register — Analytics Dashboard</title>
+  <meta name="description" content="Analytics dashboard for Acquired letters — breakdowns by language, sender, and date." />
+  <link rel="stylesheet" href="dashboard_styles.css" />
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ TOP BAR ══════════ -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-logo">📥</div>
+    <div>
+      <h1>Acquired Register — Analytics</h1>
+      <div class="topbar-subtitle">Received letters statistics &amp; trends</div>
+    </div>
+  </div>
+  <div class="topbar-actions">
+    <a href="dak_acquired.html" class="btn-back">← Back to Acquired</a>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════ MAIN ═════════════ -->
+<main class="dashboard-wrapper">
+
+  <!-- Error Banner -->
+  <div class="error-banner" id="errorBanner"></div>
+
+  <!-- ── Filter Bar ──────────────────────────────────────── -->
+  <section class="filter-bar" aria-label="Date filter">
+    <label for="dateFrom">From</label>
+    <input type="date" id="dateFrom" />
+    <label for="dateTo">To</label>
+    <input type="date" id="dateTo" />
+    <button class="btn-filter" id="btnFilter">Apply Filter</button>
+    <button class="btn-reset"  id="btnReset">Reset</button>
+    <span class="filter-spacer"></span>
+    <span id="last-updated"></span>
+  </section>
+
+  <!-- ── Stat Cards ──────────────────────────────────────── -->
+  <section class="stat-cards" aria-label="Summary statistics">
+    <div class="stat-card c1">
+      <div class="stat-icon">📨</div>
+      <div class="stat-value" id="statTotal">—</div>
+      <div class="stat-label">Total Letters Received</div>
+    </div>
+    <div class="stat-card c2">
+      <div class="stat-icon">📅</div>
+      <div class="stat-value" id="statMonth">—</div>
+      <div class="stat-label">This Month</div>
+    </div>
+    <div class="stat-card c3">
+      <div class="stat-icon">🏢</div>
+      <div class="stat-value" id="statSender" style="font-size:1.3rem">—</div>
+      <div class="stat-label">Top Sender</div>
+    </div>
+  </section>
+
+  <!-- ── Charts Row 1: 3 Charts ──────────────────────── -->
+  <div class="charts-grid">
+
+    <!-- Letter Language -->
+    <div class="chart-card">
+      <div class="chart-title">Letter Language</div>
+      <div class="chart-subtitle">Language distribution of received letters</div>
+      <div class="chart-container">
+        <canvas id="chartLang"></canvas>
+      </div>
+      <ul class="legend-list" id="legendLang"></ul>
+    </div>
+
+    <!-- Top Places -->
+    <div class="chart-card">
+      <div class="chart-title">Top Senders (Received From)</div>
+      <div class="chart-subtitle">Top 10 senders by letter count</div>
+      <div class="chart-container" style="min-height:260px">
+        <canvas id="chartSender"></canvas>
+      </div>
+    </div>
+
+    <!-- Letters by Month (wide) -->
+    <div class="chart-card wide">
+      <div class="chart-title">Letters Received — Last 12 Months</div>
+      <div class="chart-subtitle">Monthly volume trend</div>
+      <div class="chart-container" style="min-height:260px">
+        <canvas id="chartMonth"></canvas>
+      </div>
+    </div>
+
+  </div><!-- /.charts-grid -->
+
+</main>
+
+<!-- ═══════════════════════════════════ LOADING OVERLAY ══════ -->
+<div class="loading-overlay" id="loadingOverlay" style="display:none">
+  <div class="spinner"></div>
+  <div class="loading-text">Loading analytics…</div>
+</div>
+
+<script src="auth.js"></script>
+<script src="dashboard_acquired.js"></script>
+</body>
+</html>
