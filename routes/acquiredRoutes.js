@@ -12,45 +12,8 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../utils/db.js');
 
-const JWT = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET;
-
-function authenticateJWT(req, res, next) {
-    const authHeader = req.headers.authorization;
-    if (authHeader) {
-        const token = authHeader.split(' ')[1];
-        JWT.verify(token, JWT_SECRET, (err, user) => {
-            if (err) return res.status(403).json({ error: 'Invalid token' });
-            req.user = user;
-            next();
-        });
-    } else {
-        res.status(401).json({ error: 'No token provided' });
-    }
-}
-
-//FORMATTING DATE FOR POSTGRES
-function formatDateForPostgres(dateStr) {
-    if (!dateStr) return null;
-    const parts = dateStr.split('/');
-    if (parts.length !== 3) {
-        throw new Error(`Invalid date format: ${dateStr}. Expected dd/mm/yyyy.`);
-    }
-    const day = parts[0].padStart(2, '0');
-    const month = parts[1].padStart(2, '0');
-    const year = parts[2];
-    return `${year}-${month}-${day}`;
-}
-
-// Helper function to format date for frontend (dd/mm/yyyy)
-function formatDateForFrontend(dateStr) {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-}
+const { authenticateJWT } = require('../utils/auth');
+const { formatDateForPostgres, formatDateForFrontend } = require('../utils/helpers');
 
 // Save acquired data to database (BULK SAVE)
 router.post('/save', authenticateJWT, async (req, res) => {
@@ -305,6 +268,88 @@ router.post('/save-changes', authenticateJWT, async (req, res) => {
         });
     } finally {
         client.release();
+    }
+});
+//======================================
+// DASHBOARD STATS
+//======================================
+
+router.get('/stats', authenticateJWT, async (req, res) => {
+    try {
+        const userId = req.user.user_id;
+        let dateFilter = '';
+        const params = [userId];
+        
+        // Add date filtering if provided
+        if (req.query.from_date && req.query.to_date) {
+            dateFilter = `AND acquired_date >= $2 AND acquired_date <= $3`;
+            params.push(req.query.from_date, req.query.to_date);
+        }
+
+        // 1. Total Count
+        const totalResult = await pool.query(
+            `SELECT COUNT(*) FROM acquired WHERE user_id = $1 ${dateFilter}`,
+            params
+        );
+        const total = parseInt(totalResult.rows[0].count);
+
+        // 2. By Language (Hindi, English, Bilingual)
+        const byLanguage = await pool.query(
+            `SELECT language, COUNT(*) as count 
+             FROM acquired 
+             WHERE user_id = $1 ${dateFilter} 
+             GROUP BY language`,
+            params
+        );
+
+        // 3. Top 10 Senders (Received From)
+        const bySender = await pool.query(
+            `SELECT 
+                COALESCE(eng_received_from, hi_received_from, 'Unknown') as sender, 
+                COUNT(*) as count 
+             FROM acquired 
+             WHERE user_id = $1 ${dateFilter} 
+             GROUP BY sender 
+             ORDER BY count DESC 
+             LIMIT 10`,
+            params
+        );
+
+        // 4. By Month (Last 12 Months)
+        const monthParams = [userId];
+        let monthFilter = '';
+        if (req.query.from_date && req.query.to_date) {
+            monthFilter = `AND acquired_date >= $2 AND acquired_date <= $3`;
+            monthParams.push(req.query.from_date, req.query.to_date);
+        } else {
+            monthFilter = `AND acquired_date >= CURRENT_DATE - INTERVAL '12 months'`;
+        }
+
+        const byMonth = await pool.query(
+            `SELECT 
+                TO_CHAR(acquired_date, 'YYYY-MM') as month,
+                COUNT(*) as count 
+             FROM acquired 
+             WHERE user_id = $1 ${monthFilter}
+             GROUP BY month 
+             ORDER BY month ASC`,
+            monthParams
+        );
+
+        res.json({
+            success: true,
+            total,
+            byLanguage: byLanguage.rows,
+            bySender: bySender.rows,
+            byMonth: byMonth.rows
+        });
+
+    } catch (error) {
+        console.error('Stats error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch statistics'
+        });
     }
 });
 
