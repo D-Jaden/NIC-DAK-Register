@@ -33,13 +33,4 @@ const pool = new Pool({
   }
 })();
 
-pool.query(`SELECT*FROM despatch`,(err,res)=>{
-    if(!err){
-        console.log(res.rows);
-    }
-    else{
-        console.log(err.message);
-    }
-});
-
 module.exports = pool ;
