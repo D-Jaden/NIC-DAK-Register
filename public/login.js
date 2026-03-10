@@ -216,7 +216,6 @@ document.querySelector('.reg-btn button').addEventListener('click', async (e) =>
         console.log('Registration response:', result);
 
         if (response.ok && result.success) {
-            // ✅ STORE THE TOKEN - This was missing!
             if (result.token) {
                 setAuthToken(result.token);
                 console.log('Registration token stored successfully');
