@@ -12,45 +12,8 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../utils/db.js');
 
-const JWT = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET;
-
-function authenticateJWT(req, res, next) {
-    const authHeader = req.headers.authorization;
-    if (authHeader) {
-        const token = authHeader.split(' ')[1];
-        JWT.verify(token, JWT_SECRET, (err, user) => {
-            if (err) return res.status(403).json({ error: 'Invalid token' });
-            req.user = user;
-            next();
-        });
-    } else {
-        res.status(401).json({ error: 'No token provided' });
-    }
-}
-
-//FORMATTING DATE FOR POSTGRES
-function formatDateForPostgres(dateStr) {
-    if (!dateStr) return null;
-    const parts = dateStr.split('/');
-    if (parts.length !== 3) {
-        throw new Error(`Invalid date format: ${dateStr}. Expected dd/mm/yyyy.`);
-    }
-    const day = parts[0].padStart(2, '0');
-    const month = parts[1].padStart(2, '0');
-    const year = parts[2];
-    return `${year}-${month}-${day}`;
-}
-
-// Helper function to format date for frontend (dd/mm/yyyy)
-function formatDateForFrontend(dateStr) {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-}
+const { authenticateJWT } = require('../utils/auth');
+const { formatDateForPostgres, formatDateForFrontend } = require('../utils/helpers');
 
 // Save despatch data to database (EXISTING ROUTE - KEEP THIS)
 router.post('/save', authenticateJWT, async (req, res) => {
@@ -74,7 +37,6 @@ router.post('/save', authenticateJWT, async (req, res) => {
             });
         }
         
-        
         await client.query('BEGIN');
         
         let savedCount = 0;
@@ -94,8 +56,9 @@ router.post('/save', authenticateJWT, async (req, res) => {
                     letter_no,
                     delivery_method,
                     language,
+                    zone,
                     user_id
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
             `;
             const pgDate = formatDateForPostgres(row.date);
             const values = [
@@ -112,6 +75,7 @@ router.post('/save', authenticateJWT, async (req, res) => {
                 row.letterNo || null,
                 row.deliveryMethod || null,
                 row.letterLanguage || null,
+                row.zone || null,
                 userId
             ];
             
@@ -164,6 +128,7 @@ router.get('/load', authenticateJWT, async (req, res) => {
                 letter_no,
                 delivery_method,
                 language,
+                zone,
                 created_at,
                 updated_at
             FROM despatch 
@@ -171,7 +136,6 @@ router.get('/load', authenticateJWT, async (req, res) => {
             ORDER BY serial_no ASC`,
             [userId]
         );
-        
         
         const transformedData = result.rows.map(row => ({
             id: row.id,
@@ -188,6 +152,7 @@ router.get('/load', authenticateJWT, async (req, res) => {
             letterNo: row.letter_no || '',
             deliveryMethod: row.delivery_method || '',
             letterLanguage: row.language || '',
+            zone: row.zone || '',
             isFromDatabase: true,
             hasChanges: false
         }));
@@ -215,7 +180,6 @@ router.post('/save-changes', authenticateJWT, async (req, res) => {
     try {
         const { changedRows, newRows } = req.body;
         const userId = req.user.user_id;
-        
 
         await client.query('BEGIN');
         
@@ -240,8 +204,9 @@ router.post('/save-changes', authenticateJWT, async (req, res) => {
                         letter_no = $10,
                         delivery_method = $11,
                         language = $12,
+                        zone = $13,
                         updated_at = CURRENT_TIMESTAMP
-                    WHERE id = $13 AND user_id = $14
+                    WHERE id = $14 AND user_id = $15
                 `;
                 
                 const pgDate = formatDateForPostgres(row.date);
@@ -258,6 +223,7 @@ router.post('/save-changes', authenticateJWT, async (req, res) => {
                     row.letterNo || null,
                     row.deliveryMethod || null,
                     row.letterLanguage || null,
+                    row.zone || null,
                     row.id,
                     userId
                 ];
@@ -265,7 +231,6 @@ router.post('/save-changes', authenticateJWT, async (req, res) => {
                 const result = await client.query(updateQuery, updateValues);
                 if (result.rowCount > 0) {
                     updatedCount++;
-                } else {
                 }
             }
         }
@@ -288,10 +253,11 @@ router.post('/save-changes', authenticateJWT, async (req, res) => {
                         letter_no,
                         delivery_method,
                         language,
+                        zone,
                         user_id,
                         created_at,
                         updated_at
-                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                     RETURNING id
                 `;
                 
@@ -310,6 +276,7 @@ router.post('/save-changes', authenticateJWT, async (req, res) => {
                     row.letterNo || null,
                     row.deliveryMethod || null,
                     row.letterLanguage || null,
+                    row.zone || null,
                     userId
                 ];
                 
@@ -344,6 +311,91 @@ router.post('/save-changes', authenticateJWT, async (req, res) => {
         });
     } finally {
         client.release();
+    }
+});
+
+//======================================
+// DASHBOARD STATS ROUTE
+//======================================
+
+router.get('/stats', authenticateJWT, async (req, res) => {
+    try {
+        const userId = req.user.user_id;
+        const { from, to } = req.query;
+
+        // Build date filter clause
+        let dateFilter = '';
+        const params = [userId];
+        if (from && to) {
+            params.push(from, to);
+            dateFilter = `AND date BETWEEN $2 AND $3`;
+        } else if (from) {
+            params.push(from);
+            dateFilter = `AND date >= $2`;
+        } else if (to) {
+            params.push(to);
+            dateFilter = `AND date <= $2`;
+        }
+
+        const base = `FROM despatch WHERE user_id = $1 ${dateFilter}`;
+
+        // Total count
+        const totalResult = await pool.query(`SELECT COUNT(*) as total ${base}`, params);
+        const total = parseInt(totalResult.rows[0].total);
+
+        // By zone
+        const zoneResult = await pool.query(
+            `SELECT COALESCE(zone, 'Not Set') as label, COUNT(*) as count ${base} GROUP BY zone ORDER BY count DESC`,
+            params
+        );
+
+        // By delivery method
+        const methodResult = await pool.query(
+            `SELECT COALESCE(delivery_method, 'Not Set') as label, COUNT(*) as count ${base} GROUP BY delivery_method ORDER BY count DESC`,
+            params
+        );
+
+        // By language
+        const langResult = await pool.query(
+            `SELECT COALESCE(language, 'Not Set') as label, COUNT(*) as count ${base} GROUP BY language ORDER BY count DESC`,
+            params
+        );
+
+        // Top places (top 10)
+        const placeResult = await pool.query(
+            `SELECT COALESCE(eng_place, 'Not Set') as label, COUNT(*) as count ${base} AND eng_place IS NOT NULL AND eng_place != '' GROUP BY eng_place ORDER BY count DESC LIMIT 10`,
+            params
+        );
+
+        // By month — last 12 months
+        const monthResult = await pool.query(
+            `SELECT TO_CHAR(date, 'Mon YYYY') as label,
+                    TO_CHAR(date, 'YYYY-MM') as sort_key,
+                    COUNT(*) as count
+             FROM despatch
+             WHERE user_id = $1
+               AND date >= NOW() - INTERVAL '12 months'
+             GROUP BY TO_CHAR(date, 'Mon YYYY'), TO_CHAR(date, 'YYYY-MM')
+             ORDER BY sort_key ASC`,
+            [userId]
+        );
+
+        res.json({
+            success: true,
+            total,
+            byZone: zoneResult.rows.map(r => ({ label: r.label, count: parseInt(r.count) })),
+            byMethod: methodResult.rows.map(r => ({ label: r.label, count: parseInt(r.count) })),
+            byLanguage: langResult.rows.map(r => ({ label: r.label, count: parseInt(r.count) })),
+            byPlace: placeResult.rows.map(r => ({ label: r.label, count: parseInt(r.count) })),
+            byMonth: monthResult.rows.map(r => ({ label: r.label, count: parseInt(r.count) }))
+        });
+
+    } catch (error) {
+        console.error('Stats error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Database error: ' + error.message
+        });
     }
 });
 
