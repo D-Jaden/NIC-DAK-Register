@@ -76,16 +76,16 @@ router.post("/register", async (req, res) => {
   const normalizedLastName = last_name.charAt(0).toUpperCase() + last_name.slice(1).toLowerCase();
 
   try {
-    // Check if account exists
+    // Check if phone number is already registered
     const checkResult = await pool.query(
-      'SELECT * FROM users WHERE first_name = $1 AND last_name = $2 AND phone_no = $3',
-      [normalizedFirstName, normalizedLastName, phone_no]
+      'SELECT * FROM users WHERE phone_no = $1',
+      [phone_no]
     );
 
     if (checkResult.rows.length > 0) {
       return res.status(400).json({ 
         success: false, 
-        error: 'Account already exists' 
+        error: 'Phone number is already registered' 
       });
     }
     
