@@ -72,9 +72,18 @@ async function initDatabase() {
       );
     `);
 
-    console.log("✅ Database initialized successfully");
+    // Safely add zone column to despatch if it doesn't exist yet
+    await pool.query(`ALTER TABLE despatch ADD COLUMN IF NOT EXISTS zone VARCHAR(20);`);
+
+    // Indices for despatch table
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_despatch_date      ON despatch(date);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_despatch_serial_no ON despatch(serial_no);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_despatch_user_id   ON despatch(user_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_despatch_zone       ON despatch(zone);`);
+
+    console.log("Database initialized successfully");
   } catch (error) {
-    console.error("❌ Database initialization failed:", error);
+    console.error(" Database initialization failed:", error);
   }
 }
 
