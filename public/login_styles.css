@@ -300,10 +300,10 @@ input:checked + .slider:before {
     justify-content: center;
     align-items: center;
     width: 100%;
-    max-width: 700px;
+    max-width: 80%;
     margin: 1rem auto; 
     margin-top: 0;
-    min-height: 100px; 
+    min-height: 80%; 
     backface-visibility: hidden;
     display: flex;
     flex-direction: column; 
@@ -313,9 +313,9 @@ input:checked + .slider:before {
     flex-direction: column;
     align-items: center;
     justify-content:flex-start; 
-    padding: 15px; 
-    width: 380px;
-    max-width: 800px;
+    padding: 3%; 
+    width: 110%;
+    max-width: 130%;
     border-radius: 10px;
     border: 1px solid #2c3e50 ;
     backdrop-filter: blur(10px);
@@ -324,8 +324,8 @@ input:checked + .slider:before {
 }
 .reg-box h2 {
     color: #2c3e50 ;
-    font-size: 1.8rem;
-    margin-bottom: 1rem; 
+    font-size: 1.8vw;
+    margin-bottom: 5%; 
     text-align: center;
 }
 .captcha-area {
@@ -345,7 +345,7 @@ input:checked + .slider:before {
     height: 100%; 
     padding: 5px;
     color: rgb(0, 0, 0);
-    font-size: 1.2rem;
+    font-size: 0.9vw;
 }
 
 .cap-in {
@@ -463,8 +463,8 @@ input:checked + .slider:before {
     left: 0;
     right: 0;
     background-color: #1e2a37 ;
-    height: 5vh; 
-    min-height: 60px;
+    height: 7%; 
+    min-height: 5%;
     display: flex;
     align-items: center;
     justify-content: center;
