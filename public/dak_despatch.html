@@ -97,8 +97,9 @@
                             </div>
                         </div>
                         <div class="search-container">
-                            <div class = "pdf">
-                                <button class = "pdf-btn" onclick="exportToPDF()">View as PDF</button>
+                            <div class="pdf">
+                                <button class="pdf-btn" onclick="exportToPDF()">View as PDF</button>
+                                <a href="dashboard.html" class="pdf-btn" style="text-decoration:none;display:inline-block;text-align:center;background:#ff3333;color:white;">📊 Dashboard</a>
                             </div>
                             <div class="split-btn-container">
                                 <button class="entries-btn">No Of Entries</button>
@@ -329,6 +330,31 @@
                               </div>
                             </th>
 
+                            <!-- =========  9. ZONE  ========= -->
+                            <th class="zone">
+                              <div class="column-header">
+                                <span>Zone</span>
+                                <div class="hamburger-menu">
+                                  <button class="hamburger-btn">☰  </button>
+                                  <div class="sort-dropdown" id="sort-zone">
+                                    <div class="dropdown-section">
+                                      <div class="dropdown-header">Sort</div>
+                                      <div class="sort-option" data-order="asc" onclick="sortColumn('zone','asc')">Sort Ascending</div>
+                                      <div class="sort-option" data-order="desc" onclick="sortColumn('zone','desc')">Sort Descending</div>
+                                    </div>
+                                    <div class="dropdown-section">
+                                      <div class="dropdown-header">Search</div>
+                                      <input type="text" class="column-search-input" placeholder="Search zone..." data-column="zone">
+                                      <div class="search-actions">
+                                        <button class="search-btn" onclick="searchColumn('zone')">Filter</button>
+                                        <button class="search-btn clear" onclick="clearColumnSearch('zone')">Clear</button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </th>
+
                         </tr>
                     </thead>
 
@@ -354,6 +380,7 @@
     </div>
     
     <script src="auth.js"></script>
+    <script src="shared.js"></script>
     <script src="dak_despatch.js"></script>
 </body>
 </html>
