@@ -695,7 +695,7 @@ async function loadUserData() {
     window.isLoadingData = true;
 
     try {
-        console.log('ðŸ“¥ Loading user data...');
+        console.log('Loading user data...');
         
         const response = await fetch('/api/acquired/load', {
             method: 'GET',
