@@ -25,7 +25,7 @@ Make sure you have the following installed before running the project:
 - Don't forget to read each folder for better understanding for the database,routes,and node modules 
 
 ## FEATURES
-### 🔐 Authentication  
+### Authentication  
 - User **Registration** with:
   - First Name, Last Name, Phone Number fields.
   - Captcha verification and Agreement checkbox.
@@ -37,7 +37,7 @@ Make sure you have the following installed before running the project:
 
 ---
 
-### 📊 Logbook Interface  
+### Logbook Interface  
 - Two separate tables: **Despatch** and **Acquired**.
 - A **Switch Button** allows toggling between the two tables easily.
 - Both tables share the same functionalities:
@@ -53,8 +53,13 @@ Make sure you have the following installed before running the project:
 - When a user logs in, all previously saved Despatch and Acquired data is automatically loaded from their account.
 
 ---
+## Admin Dashboard
 
-## 🗄️ Database  
+- Then Dashboard allows you to check the statistics of the despatch and acquired accordingly based for every user
+- Every entry is updated based on the data entered accordingly
+- This makes it easier to track data accordingly  
+---
+## Database  
 
 - The project uses **PostgreSQL** for backend data storage.  
 - All user registration details and table data are saved securely in the database.  
@@ -70,13 +75,12 @@ Make sure you have the following installed before running the project:
 
 Planned future enhancements include:
 
-- 🌙 **Dark Mode UI** for better accessibility and aesthetics.  
-- 👥 **Role-Based Access Control (RBAC)** — separate permissions for Admins and Users.  
-- 📤 **Export Options** — ability to export data as Excel or CSV files.  
-- 🔔 **Notification System** — instant alerts for new entries or updates.  
-- 📈 **Dashboard Analytics** — visualize Despatch and Acquired trends over time.  
-- 💾 **Auto-Save Feature** — periodic data saving to prevent accidental loss.  
-- 🧩 **Enhanced Security** — improved password encryption and validation logic.
+- **Dark Mode UI** for better accessibility and aesthetics.  
+- **Role-Based Access Control (RBAC)** — separate permissions for Admins and Users.  
+- **Export Options** — ability to export data as Excel or CSV files.  
+- **Notification System** — instant alerts for new entries or updates.    
+- **Auto-Save Feature** — periodic data saving to prevent accidental loss.  
+- **Enhanced Security** — improved password encryption and validation logic.
 - **Better Responsiveness** — ability to respond to different devices better
 - **Better PDF View** — A modern way of viewing the table in PDF Format 
 
