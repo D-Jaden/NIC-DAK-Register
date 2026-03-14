@@ -91,7 +91,7 @@ Make sure you have the following installed before running the project:
 
 ## HOW TO RUN ?
 - ```git clone https://github.com/D-Jaden/DAK-Register```
-- In PostgreSQL create the DB called dak via this command (`CREAT DATABASE dak;`)
+- In PostgreSQL create the DB called **dak** via this command (`CREAT DATABASE dak;`)
 - ```cd DAK-Register```
 - ```npm run dev``` (make sure you have insaleed the necessary npm packages mentioned in the node_modules)
 - The tables are automatically created via the initDatabase.js
