@@ -8,7 +8,76 @@ The application provides a **secure login and registration system**, intuitive d
 
 Users can register with their basic details, log in securely, and seamlessly switch between Despatch and Acquired tables. Each account maintains its own data, ensuring personalized access and record persistence.
 
-## Content
+## TECH STACK
+
+![HTML](https://img.shields.io/badge/HTML-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![CSS](https://img.shields.io/badge/CSS-1572B6?style=for-the-badge&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![Hugging Face](https://img.shields.io/badge/HuggingFace-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+
+## CONTENT
+
+## PROJECT STRUCTURE
+```
+.
+├── package.json
+├── package-lock.json
+├── public
+│   ├── auth.js
+│   ├── dak_acquired.html
+│   ├── dak_acquired.js
+│   ├── dak_acquired_styles.css
+│   ├── dak_despatch.html
+│   ├── dak_despatch.js
+│   ├── dak_despatch_styles.css
+│   ├── dashboard_acquired.html
+│   ├── dashboard_acquired.js
+│   ├── dashboard.html
+│   ├── dashboard.js
+│   ├── dashboard_styles.css
+│   ├── images
+│   │   ├── captcha.png
+│   │   ├── closed-eye.png
+│   │   ├── digital-india.png
+│   │   ├── NIC Logo JPG
+│   │   │   ├── BILINGUAL FULL LENGTH VERSION  blue bg-01.jpg
+│   │   │   ├── BILINGUAL FULL LENGTH VERSION  sans bg-01.jpg
+│   │   │   ├── BILINGUAL FULL LENGTH VERSION white  bg-01.jpg
+│   │   │   ├── BILINGUAL _SQUARE_NIC_Logo_blue_bg-01.jpg
+│   │   │   ├── BILINGUAL _SQUARE_NIC_Logo_white_bg-01.jpg
+│   │   │   ├── ICONIC_SQUARE_NIC_Logo_blue_bg-01.jpg
+│   │   │   ├── ICONIC_SQUARE_NIC_Logo_white_bg-01.jpg
+│   │   │   ├── NIC_Logo1-01.jpg
+│   │   │   ├── NIC logo 1 Bilingual Blue 1-01.jpg
+│   │   │   ├── NIC logo 1 Bilingual sans.jpg
+│   │   │   ├── NIC logo 1 Bilingual white 1-01.jpg
+│   │   │   ├── Nic_logo2-01.jpg
+│   │   │   └── Nic_logo3-01.jpg
+│   │   ├── NIC-Logo-white.png
+│   │   ├── open-book.png
+│   │   └── open-eye.png
+│   ├── login.html
+│   ├── login.js
+│   ├── login_styles.css
+│   ├── shared.js
+│   └── terms.html
+├── routes
+│   ├── acquiredRoutes.js
+│   ├── despatchRoutes.js
+│   └── userRoutes.js
+├── server.js
+├── server.log
+├── test_stats_auth.js
+└── utils
+    ├── auth.js
+    ├── db.js
+    ├── helpers.js
+    └── initDatabase.js
+```
 
 ## WHAT TO INSTALL ?
 Make sure you have the following installed before running the project:  
@@ -20,10 +89,10 @@ Make sure you have the following installed before running the project:
 - **VSCode** or any IDE to run javascript
 
 ## HOW TO RUN ?
-- git clone https://github.com/D-Jaden/DAK-Register
+- ```git clone https://github.com/D-Jaden/DAK-Register```
 - In PostgreSQL create the DB called dak via this command (`CREAT DATABASE dak;`)
-- cd DAK-Register
-- npm run dev (make sure you have insaleed the necessary npm packages mentioned in the node_modules)
+- ```cd DAK-Register```
+- ```npm run dev``` (make sure you have insaleed the necessary npm packages mentioned in the node_modules)
 - The tables are automatically created via the initDatabase.js
 - Go to http://localhost:3000 (or the PORT number of your choice)
 - Don't forget to read each folder for better understanding for the database,routes,and node modules 
@@ -74,6 +143,14 @@ Make sure you have the following installed before running the project:
   - Supports structured data management for scalability and multi-user handling.
 
 ---
+## TRANSLATION MODEL
+### KUTRIM AI LAB
+
+### Translation Score
+IN22-Gen English to Indic
+| Language | Krutrim |
+|---------|---------|
+| Hindi   | 54.4    |
 
 ## FUTURE UPDATES
 
@@ -88,5 +165,7 @@ Planned future enhancements include:
 - **Better Responsiveness** — ability to respond to different devices better
 - **Better PDF View** — A modern way of viewing the table in PDF Format
 - **Status Update** - If a letter was successfully acquired and delivered {Status goes from Pending -> Acquired} which has to be done from the department/recipient that received it (via a radio button or checkbox)
-
+- **Real Time Collaboration** - Multiple users can view and edit documents simultaneously with live updates (Key or like add collaborators via phonenumber etc) 
+- **Version Control** - Allows you to retrieve prev file if a crash occurs
+- **Offline Editing** - Allow users to edit in the offline mode with the translation which has a small cache (i.e limited translation)
 ---
