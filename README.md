@@ -133,7 +133,7 @@ Make sure you have the following installed before running the project:
 
 ---
 
-## Database  
+## DATABASE  
 
 - The project uses **PostgreSQL** for backend data storage.  
 - All user registration details and table data are saved securely in the database.  
