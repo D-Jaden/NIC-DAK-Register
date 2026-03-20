@@ -6,6 +6,7 @@ const COLORS = {
     zone:   ['#58a6ff','#3fb950','#d2a8ff','#8b949e'],
     method: ['#ffa657','#f78166','#58a6ff','#8b949e'],
     lang:   ['#d2a8ff','#58a6ff','#3fb950','#8b949e'],
+    zoneLang: ['#ffa657','#56d364','#e3b341','#79c0ff','#d2a8ff','#f78166','#3fb950'],
     month:  '#58a6ff',
     place:  ['#58a6ff','#3fb950','#ffa657','#d2a8ff','#f78166',
              '#79c0ff','#56d364','#e3b341','#bc8cff','#ff7b72']
@@ -143,6 +144,26 @@ function renderCharts(stats) {
     } else {
         document.getElementById('chartZone').parentElement.innerHTML =
             '<p style="color:var(--text-muted);text-align:center;margin-top:40px">No data yet</p>';
+    }
+
+    // ── Zone + Language Doughnut ──────────────────────────────
+    const zoneLangLabels = (stats.byZoneLang || []).map(r => r.label);
+    const zoneLangCounts = (stats.byZoneLang || []).map(r => r.count);
+
+    if (zoneLangLabels.length) {
+        charts.zoneLang = new Chart(document.getElementById('chartZoneLang'), {
+            ...doughnutBase,
+            data: {
+                labels: zoneLangLabels,
+                datasets: [{ data: zoneLangCounts, backgroundColor: COLORS.zoneLang, borderWidth: 0, hoverOffset: 6 }]
+            }
+        });
+        makeLegend('legendZoneLang', zoneLangLabels, zoneLangCounts, total, COLORS.zoneLang);
+    } else {
+        const zlEl = document.getElementById('chartZoneLang');
+        if(zlEl) {
+           zlEl.parentElement.innerHTML = '<p style="color:var(--text-muted);text-align:center;margin-top:40px">No data yet</p>';
+        }
     }
 
     // ── Delivery Method Doughnut ──────────────────────────
