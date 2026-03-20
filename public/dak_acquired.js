@@ -6,7 +6,7 @@ let rowCount = 0;
 let tableData = [];
 let entriesPerPage = 6;
 let currentPage = 1;
-const translatableColumns = ['receivedFrom', 'subject'];
+const translatableColumns = ['officeName', 'subject', 'specificPerson'];
 let translationCache = new Map();
 
 let originalData = new Map();
@@ -14,6 +14,7 @@ let changedRows = new Set();
 let newRows = new Set(); 
 
 let columnFilters = {};
+let originalTableOrder = []; // for neutral sort
 
 //======================================
 //UTILITY FUNCTIONS FOR DATA HANDLING
@@ -21,13 +22,17 @@ let columnFilters = {};
 
 function createRowHash(rowData) {
     const relevantData = {
-        acquiredDate: rowData.acquiredDate || '',
-        receivedFrom: rowData.receivedFrom || '',
-        receivedFromHindi: rowData.receivedFromHindi || '',
-        letterNumber: rowData.letterNumber || '',
+        letterDate: rowData.letterDate || '',
+        acquiredOn: rowData.acquiredOn || '',
+        officeName: rowData.officeName || '',
+        officeNameHindi: rowData.officeNameHindi || '',
+        specificPerson: rowData.specificPerson || '',
+        letterNo: rowData.letterNo || '',
         subject: rowData.subject || '',
         subjectHindi: rowData.subjectHindi || '',
-        letterLanguage: rowData.letterLanguage || ''
+        letterLanguage: rowData.letterLanguage || '',
+        zone: rowData.zone || '',
+        acquisitionMethod: rowData.acquisitionMethod || ''
     };
     return JSON.stringify(relevantData);
 }
@@ -74,6 +79,17 @@ window.addEventListener('load', () => {
 //=============================
 function sortColumn(field, order) {
     syncTableDataWithDOM();
+    
+    if (order === 'neutral') {
+        // Restore original load order
+        if (originalTableOrder.length > 0) {
+            tableData = originalTableOrder.map(row => ({ ...row }));
+        }
+        rebuildTable();
+        applyAllFilters();
+        document.querySelectorAll('.sort-dropdown').forEach(d => d.classList.remove('show'));
+        return;
+    }
     
     const filledRows = [];
     const emptyRows = [];
@@ -140,7 +156,6 @@ function initializeTable() {
         sessionStorage.removeItem('acquired_preservedTableData');
         sessionStorage.removeItem('acquired_preservedRowCount');
         
-        setupRowInsertion();
         attachAllEventListeners();
         window.tableInitialized = true;
         
@@ -161,8 +176,6 @@ function initializeTable() {
         rebuildTable();
     }
     
-    setupRowInsertion();
-    
     const addRowBtn = document.querySelector('.add-row-btn');
     if (addRowBtn) addRowBtn.addEventListener('click', addNewRow);
  
@@ -176,17 +189,21 @@ function initializeTable() {
 
     document.querySelectorAll('.hamburger-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
-            e.stopPropagation();
+            e.stopImmediatePropagation();
             const columnHeader = this.closest('.column-header');
             const thElement = columnHeader.closest('th');
-            const column = thElement.className;
+            const column = thElement.className.trim().split(/\s+/)[0];
 
             const columnMap = {
-                'acquiredDate': 'acquiredDate',
-                'receivedFrom': 'receivedFrom',
-                'letterNumber': 'letterNumber',
+                'letterDate': 'letterDate',
+                'acquiredOn': 'acquiredOn',
+                'officeName': 'officeName',
+                'specificPerson': 'specificPerson',
+                'letterNo': 'letterNo',
                 'subject': 'subject',
-                'letterLanguage': 'letterLanguage'
+                'letterLanguage': 'letterLanguage',
+                'zone': 'zone',
+                'acquisitionMethod': 'acquisitionMethod'
             };
 
             const field = columnMap[column] || column;
@@ -290,17 +307,21 @@ function attachAllEventListeners() {
 
     document.querySelectorAll('.hamburger-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
-            e.stopPropagation();
+            e.stopImmediatePropagation();
             const columnHeader = this.closest('.column-header');
             const thElement = columnHeader.closest('th');
-            const column = thElement.className;
+            const column = thElement.className.trim().split(/\s+/)[0];
 
             const columnMap = {
-                'date': 'date',
-                'whomSent': 'toWhom',
-                'place': 'place',
+                'letterDate': 'letterDate',
+                'acquiredOn': 'acquiredOn',
+                'officeName': 'officeName',
+                'specificPerson': 'specificPerson',
+                'letterNo': 'letterNo',
                 'subject': 'subject',
-                'sentBy': 'sentBy'
+                'letterLanguage': 'letterLanguage',
+                'zone': 'zone',
+                'acquisitionMethod': 'acquisitionMethod'
             };
 
             const field = columnMap[column] || column;
@@ -479,6 +500,19 @@ document.addEventListener('DOMContentLoaded', initializeTable);
 //FIND AND REPLACE
 //==================================================
 
+function validateDateLogic(rowData) {
+    if (rowData.letterDate && rowData.acquiredOn) {
+        const letter = parseDate(rowData.letterDate);
+        const acquired = parseDate(rowData.acquiredOn);
+        const diffTime = acquired.getTime() - letter.getTime();
+        const diffDays = diffTime / (1000 * 3600 * 24);
+        if (diffDays <= 1) {
+            return { valid: false, error: 'Received On Date must be at least 2 days after Date of Letter.' };
+        }
+    }
+    return { valid: true };
+}
+
 const findInput = document.querySelector('.find-box');
 const replaceInput = document.querySelector('.replace-box');
 const replaceBtn = document.querySelector('.replace-btn');
@@ -538,39 +572,59 @@ function addNewRow() {
     const row = document.createElement('tr');
     
     const rowData = {
-        acquiredDate: '',
-        receivedFrom: '',
-        receivedFromHindi: '',
-        letterNumber: '',
+        letterDate: '',
+        acquiredOn: '',
+        officeName: '',
+        officeNameHindi: '',
+        specificPerson: '',
+        specificPersonHindi: '',
+        letterNo: '',
         subject: '',
         subjectHindi: '',
-        signature: '',
-        letterLanguage: ''
+        letterLanguage: '',
+        zone: '',
+        acquisitionMethod: ''
     };
     tableData.push(rowData);
     
     row.innerHTML = `
         <td class="row-number">${rowCount}</td>
-        <td><input type="text" class="cell" required data-row="${rowCount-1}" data-field="acquiredDate" placeholder="Enter date..." style="height: 53px;"></td>
+        <td><input type="text" class="cell english-cell" required data-row="${rowCount-1}" data-field="letterDate" placeholder="DD/MM/YYYY" style="height: 53px;"></td>
+        <td><input type="text" class="cell english-cell" data-row="${rowCount-1}" data-field="acquiredOn" placeholder="DD/MM/YYYY" style="height: 53px;"></td>
         <td>
-            <textarea class="cell english-cell" required data-row="${rowCount-1}" data-field="receivedFrom" placeholder="Enter sender..." style="resize: vertical;"></textarea>
-            <textarea class="cell hindi-cell" data-row="${rowCount-1}" data-field="receivedFromHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
+            <textarea class="cell english-cell" required data-row="${rowCount-1}" data-field="officeName" placeholder="Office / Dept name..." style="resize: vertical;"></textarea>
+            <textarea class="cell hindi-cell" data-row="${rowCount-1}" data-field="officeNameHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
         </td>
         <td>
-            <input type="text" class="cell" required data-row="${rowCount-1}" data-field="letterNumber" placeholder="Enter letter number..." style="height: 53px;">
-        </td>
-        <td>
-            <textarea class="cell english-cell" required data-row="${rowCount-1}" data-field="subject" placeholder="Enter subject..." style="resize: vertical;"></textarea>
-            <textarea class="cell hindi-cell" data-row="${rowCount-1}" data-field="subjectHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
-        </td>
-        <td>
-            <input type="text" class="cell english-cell" data-row="${rowCount-1}" data-field="signature" placeholder="Signature..." style="height: 53px;">
+            <input type="text" class="cell english-cell" data-row="${rowCount-1}" data-field="specificPerson" placeholder="Person name..." style="height: 53px;">
+            <textarea class="cell hindi-cell" data-row="${rowCount-1}" data-field="specificPersonHindi" placeholder="Hindi translation..." disabled style="resize: vertical; min-height:30px;"></textarea>
         </td>
         <td>
             <div class="radio-cell" data-row="${rowCount-1}" data-field="letterLanguage">
                 <label class="radio-label"><input type="radio" name="acq_letterLanguage_${rowCount-1}" value="Hindi" onchange="saveRadioValue(this)"> Hindi</label>
                 <label class="radio-label"><input type="radio" name="acq_letterLanguage_${rowCount-1}" value="English" onchange="saveRadioValue(this)"> English</label>
                 <label class="radio-label"><input type="radio" name="acq_letterLanguage_${rowCount-1}" value="Bilingual" onchange="saveRadioValue(this)"> Bilingual</label>
+            </div>
+        </td>
+        <td>
+            <div class="radio-cell" data-row="${rowCount-1}" data-field="zone">
+                <label class="radio-label"><input type="radio" name="acq_zone_${rowCount-1}" value="Zone A" onchange="saveRadioValue(this)"> Zone A</label>
+                <label class="radio-label"><input type="radio" name="acq_zone_${rowCount-1}" value="Zone B" onchange="saveRadioValue(this)"> Zone B</label>
+                <label class="radio-label"><input type="radio" name="acq_zone_${rowCount-1}" value="Zone C" onchange="saveRadioValue(this)"> Zone C</label>
+            </div>
+        </td>
+        <td><textarea class="cell english-cell" required data-row="${rowCount-1}" data-field="letterNo" placeholder="e.g. NIC/2025/001" style="resize: vertical; min-height: 53px;"></textarea></td>
+        <td>
+            <textarea class="cell english-cell" required data-row="${rowCount-1}" data-field="subject" placeholder="Enter subject..." style="resize: vertical;"></textarea>
+            <textarea class="cell hindi-cell" data-row="${rowCount-1}" data-field="subjectHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
+        </td>
+        <td>
+            <div class="radio-cell" data-row="${rowCount-1}" data-field="acquisitionMethod">
+                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${rowCount-1}" value="Speed Post" onchange="saveRadioValue(this)"> Speed Post</label>
+                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${rowCount-1}" value="Registered Post" onchange="saveRadioValue(this)"> Registered Post</label>
+                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${rowCount-1}" value="Hand Delivery" onchange="saveRadioValue(this)"> Hand Delivery</label>
+                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${rowCount-1}" value="Email" onchange="saveRadioValue(this)"> Email</label>
+                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${rowCount-1}" value="E-file" onchange="saveRadioValue(this)"> E-file</label>
             </div>
         </td>
     `;
@@ -582,16 +636,12 @@ function addNewRow() {
         addCellEventListeners(cell);
     });
 
-    addRowInsertionListeners(row);
 }
 function syncTableDataWithDOM() {
     const tbody = document.getElementById('tableBody');
     const rows = tbody.querySelectorAll('tr');
     
     rows.forEach((row) => {
-        // Use data-row from the first cell to get the CORRECT tableData index.
-        // DOM index (0,1,2...) is wrong on page 2+ because rebuildTable uses
-        // startIdx+index for data-row, so DOM row 0 on page 2 = tableData[6].
         const firstCell = row.querySelector('[data-row]');
         if (!firstCell) return;
         const dataIndex = parseInt(firstCell.getAttribute('data-row'));
@@ -599,14 +649,18 @@ function syncTableDataWithDOM() {
 
         if (!tableData[dataIndex]) {
             tableData[dataIndex] = {
-                acquiredDate: '',
-                receivedFrom: '',
-                receivedFromHindi: '',
-                letterNumber: '',
+                letterDate: '',
+                acquiredOn: '',
+                officeName: '',
+                officeNameHindi: '',
+                specificPerson: '',
+                specificPersonHindi: '',
+                letterNo: '',
                 subject: '',
                 subjectHindi: '',
-                signature: '',
-                letterLanguage: ''
+                letterLanguage: '',
+                zone: '',
+                acquisitionMethod: ''
             };
         }
 
@@ -618,21 +672,12 @@ function syncTableDataWithDOM() {
             return '';
         };
 
-        // Use data-field attributes instead of positional index — reliable regardless of page
-        const getField = (field) => {
-            const el = row.querySelector(`[data-field="${field}"]`);
-            return el ? getCellValue(el) : (tableData[dataIndex][field] || '');
-        };
+        const allInputs = row.querySelectorAll('input.cell, textarea.cell, [contenteditable="true"].cell');
+        allInputs.forEach(input => {
+            const field = input.getAttribute('data-field');
+            if (field) tableData[dataIndex][field] = getCellValue(input);
+        });
 
-        tableData[dataIndex].acquiredDate      = getField('acquiredDate');
-        tableData[dataIndex].receivedFrom      = getField('receivedFrom');
-        tableData[dataIndex].receivedFromHindi = getField('receivedFromHindi');
-        tableData[dataIndex].letterNumber      = getField('letterNumber');
-        tableData[dataIndex].subject           = getField('subject');
-        tableData[dataIndex].subjectHindi      = getField('subjectHindi');
-        tableData[dataIndex].signature         = getField('signature');
-
-        // Radio buttons — also use data-field
         const radioCells = row.querySelectorAll('.radio-cell');
         radioCells.forEach(radioCell => {
             const field = radioCell.getAttribute('data-field');
@@ -645,37 +690,22 @@ function syncTableDataWithDOM() {
 }
 
 function getCellValueByColumn(row, column) {
-    const allCells = row.querySelectorAll('.cell, [contenteditable="true"].cell');
-    
-    const getCellValue = (cell) => {
-        if (!cell) return '';
-        if (cell.tagName === 'INPUT') return cell.value;
-        if (cell.tagName === 'TEXTAREA') return cell.value;
-        if (cell.contentEditable === 'true') return cell.textContent;
-        return '';
-    };
-    
-    switch(column) {
-        case 'acquiredDate':
-            return getCellValue(allCells[0]);
-        case 'receivedFrom':
-            return getCellValue(allCells[1]);
-        case 'letterNumber':
-            return getCellValue(allCells[3]);
-        case 'subject':
-            return getCellValue(allCells[4]);
-        case 'letterLanguage': {
-            // Radio button - not in .cell selector, use DOM lookup
-            const radioCell = row.querySelector('.radio-cell[data-field="letterLanguage"]');
-            if (radioCell) {
-                const checked = radioCell.querySelector('input[type="radio"]:checked');
-                return checked ? checked.value : '';
-            }
-            return '';
+    // For radio fields, use radio-cell DOM lookup
+    const radioFields = ['letterLanguage', 'zone', 'acquisitionMethod'];
+    if (radioFields.includes(column)) {
+        const radioCell = row.querySelector(`.radio-cell[data-field="${column}"]`);
+        if (radioCell) {
+            const checked = radioCell.querySelector('input[type="radio"]:checked');
+            return checked ? checked.value : '';
         }
-        default:
-            return '';
+        return '';
     }
+    // For input/textarea fields, use data-field attribute
+    const el = row.querySelector(`[data-field="${column}"]`);
+    if (!el) return '';
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') return el.value;
+    if (el.contentEditable === 'true') return el.textContent;
+    return '';
 }
 //============================================
 // LOAD USER DATA ON LOGIN
@@ -731,20 +761,26 @@ async function loadUserData() {
                 return {
                     id: row.id,
                     serialNo: row.serialNo || index + 1,
-                    acquiredDate: row.acquiredDate || '',
-                    receivedFrom: row.receivedFrom || '',
-                    receivedFromHindi: row.receivedFromHindi || '',
-                    letterNumber: row.letterNumber || '',
+                    letterDate: row.letterDate || row.acquiredDate || '',
+                    acquiredOn: row.acquiredOn || '',
+                    officeName: row.officeName || row.receivedFrom || '',
+                    officeNameHindi: row.officeNameHindi || row.receivedFromHindi || '',
+                    specificPerson: row.specificPerson || '',
+                    specificPersonHindi: row.specificPersonHindi || '',
+                    letterNo: row.letterNo || row.letterNumber || '',
                     subject: row.subject || '',
                     subjectHindi: row.subjectHindi || '',
-                    signature: row.signature || '',
                     letterLanguage: row.letterLanguage || '',
+                    zone: row.zone || '',
+                    acquisitionMethod: row.acquisitionMethod || '',
                     isFromDatabase: true,
                     hasChanges: false
                 };
             });
 
             rowCount = tableData.length;
+            // Snapshot original order for neutral sort
+            originalTableOrder = tableData.map(row => ({ ...row }));
             rebuildTable();
             
             console.log(' User data loaded and displayed');
@@ -795,39 +831,55 @@ function insertRowAfter(targetRow) {
     const newRow = document.createElement('tr');
     
     const rowData = {
-        acquiredDate: '',
-        receivedFrom: '',
-        receivedFromHindi: '',
-        letterNumber: '',
+        letterDate: '',
+        acquiredOn: '',
+        officeName: '',
+        officeNameHindi: '',
+        specificPerson: '',
+        letterNo: '',
         subject: '',
         subjectHindi: '',
-        signature: '',
-        letterLanguage: ''
+        letterLanguage: '',
+        zone: '',
+        acquisitionMethod: ''
     };
     tableData.splice(targetIndex + 1, 0, rowData);
     
     newRow.innerHTML = `
         <td class="row-number">${rowCount}</td>
-        <td><input type="text" class="cell" required data-row="${targetIndex + 1}" data-field="acquiredDate" placeholder="dd/mm/yyyy" style="height: 53px;"></td>
+        <td><input type="text" class="cell english-cell" required data-row="${targetIndex + 1}" data-field="letterDate" placeholder="DD/MM/YYYY" style="height: 53px;"></td>
+        <td><input type="text" class="cell english-cell" data-row="${targetIndex + 1}" data-field="acquiredOn" placeholder="DD/MM/YYYY" style="height: 53px;"></td>
         <td>
-            <textarea class="cell english-cell" required data-row="${targetIndex + 1}" data-field="receivedFrom" placeholder="Enter sender..." style="resize: vertical;"></textarea>
-            <textarea class="cell hindi-cell" data-row="${targetIndex + 1}" data-field="receivedFromHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
+            <textarea class="cell english-cell" required data-row="${targetIndex + 1}" data-field="officeName" placeholder="Office / Dept name..." style="resize: vertical;"></textarea>
+            <textarea class="cell hindi-cell" data-row="${targetIndex + 1}" data-field="officeNameHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
         </td>
-        <td>
-            <input type="text" class="cell" required data-row="${targetIndex + 1}" data-field="letterNumber" placeholder="Enter letter number..." style="height: 53px;">
-        </td>
-        <td>
-            <textarea class="cell english-cell" required data-row="${targetIndex + 1}" data-field="subject" placeholder="Enter subject..." style="resize: vertical;"></textarea>
-            <textarea class="cell hindi-cell" data-row="${targetIndex + 1}" data-field="subjectHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
-        </td>
-        <td>
-            <input type="text" class="cell english-cell" data-row="${targetIndex + 1}" data-field="signature" placeholder="Signature..." style="height: 53px;">
-        </td>
+        <td><input type="text" class="cell english-cell" data-row="${targetIndex + 1}" data-field="specificPerson" placeholder="Person name..." style="height: 53px;"></td>
         <td>
             <div class="radio-cell" data-row="${targetIndex + 1}" data-field="letterLanguage">
                 <label class="radio-label"><input type="radio" name="acq_letterLanguage_${targetIndex + 1}" value="Hindi" onchange="saveRadioValue(this)"> Hindi</label>
                 <label class="radio-label"><input type="radio" name="acq_letterLanguage_${targetIndex + 1}" value="English" onchange="saveRadioValue(this)"> English</label>
                 <label class="radio-label"><input type="radio" name="acq_letterLanguage_${targetIndex + 1}" value="Bilingual" onchange="saveRadioValue(this)"> Bilingual</label>
+            </div>
+        </td>
+        <td>
+            <div class="radio-cell" data-row="${targetIndex + 1}" data-field="zone">
+                <label class="radio-label"><input type="radio" name="acq_zone_${targetIndex + 1}" value="Zone A" onchange="saveRadioValue(this)"> Zone A</label>
+                <label class="radio-label"><input type="radio" name="acq_zone_${targetIndex + 1}" value="Zone B" onchange="saveRadioValue(this)"> Zone B</label>
+                <label class="radio-label"><input type="radio" name="acq_zone_${targetIndex + 1}" value="Zone C" onchange="saveRadioValue(this)"> Zone C</label>
+            </div>
+        </td>
+        <td><textarea class="cell english-cell" required data-row="${targetIndex + 1}" data-field="letterNo" placeholder="e.g. NIC/2025/001" style="resize: vertical; min-height: 53px;"></textarea></td>
+        <td>
+            <textarea class="cell english-cell" required data-row="${targetIndex + 1}" data-field="subject" placeholder="Enter subject..." style="resize: vertical;"></textarea>
+            <textarea class="cell hindi-cell" data-row="${targetIndex + 1}" data-field="subjectHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
+        </td>
+        <td>
+            <div class="radio-cell" data-row="${targetIndex + 1}" data-field="acquisitionMethod">
+                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${targetIndex + 1}" value="Speed Post" onchange="saveRadioValue(this)"> Speed Post</label>
+                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${targetIndex + 1}" value="Registered Post" onchange="saveRadioValue(this)"> Registered Post</label>
+                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${targetIndex + 1}" value="Hand Delivery" onchange="saveRadioValue(this)"> Hand Delivery</label>
+                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${targetIndex + 1}" value="Email" onchange="saveRadioValue(this)"> Email</label>
+                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${targetIndex + 1}" value="E-file" onchange="saveRadioValue(this)"> E-file</label>
             </div>
         </td>
     `;
@@ -839,7 +891,6 @@ function insertRowAfter(targetRow) {
         addCellEventListeners(cell);
     });
     
-    addRowInsertionListeners(newRow);
     updateRowNumbers();
     cells[0].focus();
 }
@@ -851,40 +902,55 @@ function insertRowBefore(targetRow) {
     const newRow = document.createElement('tr');
     
     const rowData = {
-        serialNo: rowCount,
-        acquiredDate: '',
-        receivedFrom: '',
-        receivedFromHindi: '',
-        letterNumber: '',
+        letterDate: '',
+        acquiredOn: '',
+        officeName: '',
+        officeNameHindi: '',
+        specificPerson: '',
+        letterNo: '',
         subject: '',
         subjectHindi: '',
-        signature: '',
-        letterLanguage: ''
+        letterLanguage: '',
+        zone: '',
+        acquisitionMethod: ''
     };
     tableData.splice(targetIndex, 0, rowData);
     
     newRow.innerHTML = `
         <td class="row-number">${rowCount}</td>
-        <td><input type="text" class="cell" required data-row="${targetIndex}" data-field="acquiredDate" placeholder="dd/mm/yyyy" style="height: 53px;"></td>
+        <td><input type="text" class="cell english-cell" required data-row="${targetIndex}" data-field="letterDate" placeholder="DD/MM/YYYY" style="height: 53px;"></td>
+        <td><input type="text" class="cell english-cell" data-row="${targetIndex}" data-field="acquiredOn" placeholder="DD/MM/YYYY" style="height: 53px;"></td>
         <td>
-            <textarea class="cell english-cell" required data-row="${targetIndex}" data-field="receivedFrom" placeholder="Enter sender..." style="resize: vertical;"></textarea>
-            <textarea class="cell hindi-cell" data-row="${targetIndex}" data-field="receivedFromHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
+            <textarea class="cell english-cell" required data-row="${targetIndex}" data-field="officeName" placeholder="Office / Dept name..." style="resize: vertical;"></textarea>
+            <textarea class="cell hindi-cell" data-row="${targetIndex}" data-field="officeNameHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
         </td>
-        <td>
-            <input type="text" class="cell" required data-row="${targetIndex}" data-field="letterNumber" placeholder="Enter letter number..." style="height: 53px;">
-        </td>
-        <td>
-            <textarea class="cell english-cell" required data-row="${targetIndex}" data-field="subject" placeholder="Enter subject..." style="resize: vertical;"></textarea>
-            <textarea class="cell hindi-cell" data-row="${targetIndex}" data-field="subjectHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
-        </td>
-        <td>
-            <input type="text" class="cell english-cell" data-row="${targetIndex}" data-field="signature" placeholder="Signature..." style="height: 53px;">
-        </td>
+        <td><input type="text" class="cell english-cell" data-row="${targetIndex}" data-field="specificPerson" placeholder="Person name..." style="height: 53px;"></td>
         <td>
             <div class="radio-cell" data-row="${targetIndex}" data-field="letterLanguage">
                 <label class="radio-label"><input type="radio" name="acq_letterLanguage_${targetIndex}" value="Hindi" onchange="saveRadioValue(this)"> Hindi</label>
                 <label class="radio-label"><input type="radio" name="acq_letterLanguage_${targetIndex}" value="English" onchange="saveRadioValue(this)"> English</label>
                 <label class="radio-label"><input type="radio" name="acq_letterLanguage_${targetIndex}" value="Bilingual" onchange="saveRadioValue(this)"> Bilingual</label>
+            </div>
+        </td>
+        <td>
+            <div class="radio-cell" data-row="${targetIndex}" data-field="zone">
+                <label class="radio-label"><input type="radio" name="acq_zone_${targetIndex}" value="Zone A" onchange="saveRadioValue(this)"> Zone A</label>
+                <label class="radio-label"><input type="radio" name="acq_zone_${targetIndex}" value="Zone B" onchange="saveRadioValue(this)"> Zone B</label>
+                <label class="radio-label"><input type="radio" name="acq_zone_${targetIndex}" value="Zone C" onchange="saveRadioValue(this)"> Zone C</label>
+            </div>
+        </td>
+        <td><textarea class="cell english-cell" required data-row="${targetIndex}" data-field="letterNo" placeholder="e.g. NIC/2025/001" style="resize: vertical; min-height: 53px;"></textarea></td>
+        <td>
+            <textarea class="cell english-cell" required data-row="${targetIndex}" data-field="subject" placeholder="Enter subject..." style="resize: vertical;"></textarea>
+            <textarea class="cell hindi-cell" data-row="${targetIndex}" data-field="subjectHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
+        </td>
+        <td>
+            <div class="radio-cell" data-row="${targetIndex}" data-field="acquisitionMethod">
+                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${targetIndex}" value="Speed Post" onchange="saveRadioValue(this)"> Speed Post</label>
+                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${targetIndex}" value="Registered Post" onchange="saveRadioValue(this)"> Registered Post</label>
+                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${targetIndex}" value="Hand Delivery" onchange="saveRadioValue(this)"> Hand Delivery</label>
+                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${targetIndex}" value="Email" onchange="saveRadioValue(this)"> Email</label>
+                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${targetIndex}" value="E-file" onchange="saveRadioValue(this)"> E-file</label>
             </div>
         </td>
     `;
@@ -896,7 +962,6 @@ function insertRowBefore(targetRow) {
         addCellEventListeners(cell);
     });
     
-    addRowInsertionListeners(newRow);
     updateRowNumbers();
     cells[0].focus();
 }
@@ -940,10 +1005,28 @@ function saveRadioValue(radioInput) {
 }
 
 function addCellEventListeners(cell) {
-    if (cell.getAttribute('data-field') === 'acquiredDate') {
-        cell.placeholder = 'dd/mm/yyyy';
+    const field = cell.getAttribute('data-field');
+    if (field === 'letterDate' || field === 'acquiredOn') {
+        cell.placeholder = 'DD/MM/YYYY';
         cell.addEventListener('input', () => restrictDateInput(cell));
         cell.addEventListener('blur', () => restrictDateInput(cell));
+
+        cell.addEventListener('blur', function() {
+            const row = this.getAttribute('data-row');
+            if (field === 'letterDate' || field === 'acquiredOn') {
+                const rowData = tableData[row];
+                if (rowData.letterDate && rowData.acquiredOn && isValidDateString(rowData.letterDate) && isValidDateString(rowData.acquiredOn)) {
+                    const result = validateDateLogic(rowData);
+                    if (!result.valid) {
+                        this.classList.add('invalid-date');
+                        this.title = result.error;
+                    } else {
+                        this.classList.remove('invalid-date');
+                        this.title = "";
+                    }
+                }
+            }
+        });
     }
 
     cell.addEventListener('focus', function() {
@@ -980,7 +1063,7 @@ function addCellEventListeners(cell) {
 //==============================================
 
 function validateRowData(rowData, rowIndex) {
-    const requiredFields = ['acquiredDate', 'receivedFrom', 'letterNumber', 'subject', 'letterLanguage'];
+    const requiredFields = ['letterDate', 'officeName', 'letterNo', 'subject', 'letterLanguage'];
     const missingFields = [];
     
     for (const field of requiredFields) {
@@ -1046,6 +1129,9 @@ async function saveToDatabase() {
 
     syncTableDataWithDOM();
 
+    // Validate: no empty middle rows
+    if (!validateNoMiddleEmptyRows()) return;
+
     const changedRowsData = [];
     const newRowsData = [];
 
@@ -1066,15 +1152,26 @@ async function saveToDatabase() {
         }
     });
     
+    let hasInvalidDates = false;
+    let logicErrorMsg = '';
+
     changedRows.forEach(rowIndex => {
         if (tableData[rowIndex]) {
             const rowData = tableData[rowIndex];
-            if (hasRequiredFields(rowData)) {
-                changedRowsData.push({
-                    ...rowData,
-                    serialNo: rowIndex + 1,
-                    operation: 'update'
-                });
+            if ((rowData.letterDate && !isValidDateString(rowData.letterDate)) || (rowData.acquiredOn && !isValidDateString(rowData.acquiredOn))) {
+                hasInvalidDates = true;
+            } else if (hasRequiredFields(rowData)) {
+                const logic = validateDateLogic(rowData);
+                if (!logic.valid) {
+                    hasInvalidDates = true;
+                    logicErrorMsg = logic.error;
+                } else {
+                    changedRowsData.push({
+                        ...rowData,
+                        serialNo: rowIndex + 1,
+                        operation: 'update'
+                    });
+                }
             }
         }
     });
@@ -1082,15 +1179,28 @@ async function saveToDatabase() {
     newRows.forEach(rowIndex => {
         if (tableData[rowIndex]) {
             const rowData = tableData[rowIndex];
-            if (hasRequiredFields(rowData)) {
-                newRowsData.push({
-                    ...rowData,
-                    serialNo: rowIndex + 1,
-                    operation: 'insert'
-                });
+            if ((rowData.letterDate && !isValidDateString(rowData.letterDate)) || (rowData.acquiredOn && !isValidDateString(rowData.acquiredOn))) {
+                hasInvalidDates = true;
+            } else if (hasRequiredFields(rowData)) {
+                const logic = validateDateLogic(rowData);
+                if (!logic.valid) {
+                    hasInvalidDates = true;
+                    logicErrorMsg = logic.error;
+                } else {
+                    newRowsData.push({
+                        ...rowData,
+                        serialNo: rowIndex + 1,
+                        operation: 'insert'
+                    });
+                }
             }
         }
     });
+
+    if (hasInvalidDates) {
+        alert(logicErrorMsg || 'One or more rows contain an invalid date. Please ensure dates are in DD/MM/YYYY format with valid days and months.');
+        return;
+    }
 
     const totalChanges = changedRowsData.length + newRowsData.length;
     
@@ -1197,7 +1307,7 @@ async function translateText(text) {
     }
     
     try {
-        const response = await fetch("https://d-jaden02-en-hi-helsinki-model.hf.space/translate", {
+        const response = await fetch("https://d-jaden02-pys-deep-transalator.hf.space/translate", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -1229,7 +1339,7 @@ async function translateText(text) {
 
 async function translateTextBatch(texts) {
     try {
-        const response = await fetch("https://d-jaden02-en-hi-helsinki-model.hf.space/batch_translate", {
+        const response = await fetch("https://d-jaden02-pys-deep-transalator.hf.space/batch_translate", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -1272,24 +1382,24 @@ async function translateTextBatch(texts) {
 //TRANSLATION
 //============================================
 
-let gradioClient = null;
-
-async function getClient() {
-    if (!gradioClient) {
-        const { Client } = await import("https://esm.sh/@gradio/client");
-        gradioClient = await Client.connect("D-Jaden02/Krutrim_English_Hi_Translation");
-    }
-    return gradioClient;
-}
+let debounceTimer = null;
+const API_BASE = "https://d-jaden02-pys-deep-transalator.hf.space";
 
 async function translateText(text) {
     if (!text?.trim()) return text;
     if (translationCache.has(text)) return translationCache.get(text);
-
+    
     try {
-        const client = await getClient();
-        const result = await client.predict("/translate", { text: text });
-        const translated = result.data[0];
+        const response = await fetch(`${API_BASE}/translate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+        });
+        
+        if (!response.ok) throw new Error(`API error: ${response.status}`);
+        
+        const data = await response.json();
+        const translated = data.translated_text;
         translationCache.set(text, translated);
         return translated;
     } catch (error) {
@@ -1299,54 +1409,32 @@ async function translateText(text) {
 }
 
 async function translateTextBatch(texts) {
-    const client = await getClient(); // connect once
-    const results = await Promise.all(
-        texts.map(async (text) => {
-            if (translationCache.has(text)) return translationCache.get(text);
-            try {
-                const result = await client.predict("/translate", { text });
-                const translated = result.data[0];
-                translationCache.set(text, translated);
-                return translated;
-            } catch {
-                return text;
-            }
-        })
-    );
-    const map = {};
-    texts.forEach((t, i) => map[t] = results[i]);
-    return map;
-}
-
-async function translateText(text) {
-    console.log('Translation requested for:', text);
-
-    if (translationCache.has(text)) {
-        console.log('Using cached translation');
-        return translationCache.get(text);
-    }
-
     try {
-        const { Client } = await import("https://esm.sh/@gradio/client");
-        const client = await Client.connect("D-Jaden02/Krutrim_English_Hi_Translation");
-        const result = await client.predict("/translate", { text: text });
+        const response = await fetch(`${API_BASE}/batch_translate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ texts })
+        });
 
-        const translated = result.data[0];
-        translationCache.set(text, translated);
-        console.log('Translation successful:', translated);
-        return translated;
+        if (!response.ok) throw new Error(`Batch API error: ${response.status}`);
 
+        const data = await response.json();
+        const map = {};
+        data.results.forEach((result, index) => {
+            if (result.translated_text) {
+                map[texts[index]] = result.translated_text;
+                translationCache.set(texts[index], result.translated_text);
+            } else {
+                map[texts[index]] = texts[index]; // fallback
+            }
+        });
+        return map;
     } catch (error) {
-        console.error('Translation error:', error);
-        return text; // fallback to original
+        console.error('Batch translation error:', error);
+        const fallback = {};
+        texts.forEach(t => fallback[t] = t);
+        return fallback;
     }
-}
-
-async function translateTextBatch(texts) {
-    const results = await Promise.all(texts.map(t => translateText(t)));
-    const map = {};
-    texts.forEach((t, i) => map[t] = results[i]);
-    return map;
 }
 
 async function saveData(cell) {
@@ -1361,7 +1449,7 @@ async function saveData(cell) {
         // Track changes (skip signature field as it's not required)
         if (field !== 'signature' && tableData[row].isFromDatabase) {
             const currentHash = createRowHash(tableData[row]);
-            const originalHash = originalData.get(tableData[row].id);
+            const originalHash = originalData.get(row);
             
             if (currentHash !== originalHash) {
                 changedRows.add(row);
@@ -1397,7 +1485,7 @@ async function saveData(cell) {
                 // Mark as changed if needed
                 if (tableData[row].isFromDatabase) {
                     const currentHash = createRowHash(tableData[row]);
-                    const originalHash = originalData.get(tableData[row].id);
+                    const originalHash = originalData.get(row);
                     
                     if (currentHash !== originalHash) {
                         changedRows.add(row);
@@ -1462,291 +1550,124 @@ document.addEventListener('DOMContentLoaded', function() {
 function exportToPDF() {
     syncTableDataWithDOM();
 
-    const original = document.getElementById('excelTable');
-    if (!original) {
-        showNotification('Error: Table not found', 'error');
+    // ── 1. Filter: only rows with at least one meaningful field ────────────
+    const meaningfulRows = tableData
+        .map((row, idx) => ({ row, idx }))
+        .filter(({ row }) =>
+            ['letterDate','acquiredOn','officeName','specificPerson',
+             'letterNo','letterLanguage','zone','subject','acquisitionMethod']
+            .some(k => (row[k] || '').trim() !== '')
+        );
+
+    if (meaningfulRows.length === 0) {
+        showNotification('No data to export.', 'error');
         return;
     }
 
-    const clone = original.cloneNode(true);
-    clone.style.cssText = [
-        'position:static',
-        'bottom:auto',
-        'left:auto',
-        'margin:0',
-        'width:100%',
-        'border-radius:0',
-        'box-shadow:none'
-    ].join(' !important;') + ' !important;';
+    // ── 2. Column definitions ──────────────────────────────────────────────
+    // [header label , data key        , width , align ]
+    const cols = [
+        ['No.',             '_serial',           '4%',  'center'],
+        ['Date of Letter',  'letterDate',        '8%',  'center'],
+        ['Received On',     'acquiredOn',        '8%',  'center'],
+        ['Office / Dept',   'officeName',        '11%', 'left'  ],
+        ['Name of Person',  'specificPerson',    '9%',  'left'  ],
+        ['Letter No.',      'letterNo',          '10%', 'left'  ],
+        ['Language',        'letterLanguage',    '7%',  'center'],
+        ['Zone',            'zone',              '6%',  'center'],
+        ['Subject',         'subject',           '20%', 'left'  ],
+        ['Method',          'acquisitionMethod', '9%',  'center'],
+    ];
 
-    clone.querySelectorAll('.hamburger-menu, .sort-dropdown, .insert-row-btn').forEach(el => el.remove());
-    clone.querySelectorAll('.row-changed, .row-new').forEach(r => {
-        r.classList.remove('row-changed', 'row-new');
-        r.style.borderLeft = 'none';
+    // Hindi companion keys
+    const hindiMap = {
+        officeName:     'officeNameHindi',
+        specificPerson: 'specificPersonHindi',
+        subject:        'subjectHindi'
+    };
+
+    function esc(v) {
+        return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // ── 3. Build thead ─────────────────────────────────────────────────────
+    let thead = '<thead><tr>';
+    cols.forEach(([label,,w]) => {
+        thead += `<th style="width:${w}">${esc(label)}</th>`;
     });
+    thead += '</tr></thead>';
 
-    clone.querySelectorAll('thead th').forEach(th => {
-        const span = th.querySelector('.column-header span');
-        if (span) th.textContent = span.textContent;
-    });
-
-    clone.querySelectorAll('tbody tr').forEach(row => {
-        row.querySelectorAll('td').forEach((cell, index) => {
-            if (index === 0) {
-                const rn = cell.querySelector('.row-number');
-                if (rn) cell.textContent = rn.textContent;
-                return;
-            }
-
-            const radioCell = cell.querySelector('.radio-cell');
-            if (radioCell) {
-                const checked = radioCell.querySelector('input[type="radio"]:checked');
-                cell.innerHTML = '';
-                const span = document.createElement('span');
-                span.textContent = checked ? checked.value : '—';
-                span.style.cssText = 'font-size:11px; font-weight:600; color:#1a5276;';
-                cell.appendChild(span);
-                return;
-            }
-
-            const inputs = cell.querySelectorAll('input.cell');
-            const ces = cell.querySelectorAll('[contenteditable="true"].cell');
-
-            if (ces.length > 0) {
-                function wrapText(text, wordsPerLine) {
-                    const words = text.trim().split(/\s+/).filter(Boolean);
-                    const chunks = [];
-                    for (let j = 0; j < words.length; j += wordsPerLine) {
-                        chunks.push(words.slice(j, j + wordsPerLine).join(' '));
-                    }
-                    return chunks.join('<br>');
+    // ── 4. Build tbody ─────────────────────────────────────────────────────
+    let tbody = '<tbody>';
+    meaningfulRows.forEach(({ row }, i) => {
+        const bg = i % 2 === 0 ? '#fff' : '#f5f5f5';
+        tbody += `<tr style="background:${bg}">`;
+        cols.forEach(([,key,,align]) => {
+            let val = key === '_serial' ? String(i + 1) : esc(row[key] || '');
+            let extra = '';
+            if (hindiMap[key]) {
+                const hval = (row[hindiMap[key]] || '').trim();
+                if (hval) {
+                    extra = `<div style="font-family:'Noto Sans Devanagari',sans-serif;font-size:8.5px;color:#222;margin-top:3px;padding-top:2px;border-top:1px solid #e0e0e0">${esc(hval)}</div>`;
                 }
-
-                const container = document.createElement('div');
-                container.style.cssText = 'white-space:normal;word-wrap:break-word;overflow-wrap:break-word;overflow:visible;max-width:100%;text-align:left;';
-                
-                ces.forEach((ce, i) => {
-                    const rawText = ce.textContent.trim();
-                    if (!rawText) return;
-                    
-                    const d = document.createElement('div');
-                    d.innerHTML = wrapText(rawText, 6);
-                    
-                    if (i === 1) { // Hindi
-                        d.style.cssText = 'font-family:"Noto Sans Devanagari",sans-serif;font-size:0.95em;color:#555;'
-                            + 'margin-top:4px;padding-top:3px;border-top:1px solid #ddd;'
-                            + 'white-space:normal;word-wrap:break-word;overflow-wrap:break-word;overflow:visible;height:auto;line-height:1.6;';
-                    } else { // English
-                        d.style.cssText = 'margin-bottom:2px;white-space:normal;word-wrap:break-word;overflow-wrap:break-word;overflow:visible;height:auto;line-height:1.5;';
-                    }
-                    container.appendChild(d);
-                });
-                cell.innerHTML = '';
-                cell.appendChild(container);
-                return;
             }
-
-            if (!inputs.length) return;
-
-            if (inputs.length === 1) {
-                cell.textContent = inputs[0].value || '';
-            } else {
-                const eng = cell.querySelector('.english-cell');
-                const hin = cell.querySelector('.hindi-cell');
-                const container = document.createElement('div');
-                if (eng && eng.value.trim()) {
-                    const d = document.createElement('div');
-                    d.textContent = eng.value.trim();
-                    d.style.marginBottom = '2px';
-                    container.appendChild(d);
-                }
-                if (hin && hin.value.trim()) {
-                    const d = document.createElement('div');
-                    d.textContent = hin.value.trim();
-                    d.style.cssText = 'font-family:"Noto Sans Devanagari",sans-serif;font-size:0.95em;color:#555;';
-                    container.appendChild(d);
-                }
-                cell.innerHTML = '';
-                cell.appendChild(container);
-            }
+            tbody += `<td style="text-align:${align};vertical-align:top">${val}${extra}</td>`;
         });
+        tbody += '</tr>';
     });
+    tbody += '</tbody>';
 
-    // ── Force-apply inline column widths and wrap styles ─────────────────────
-    const acquiredColWidths = ['5%','10%','18%','12%','25%','13%','17%'];
-    clone.querySelectorAll('thead tr th').forEach((th, i) => {
-        if (acquiredColWidths[i]) {
-            th.style.width    = acquiredColWidths[i];
-            th.style.maxWidth = acquiredColWidths[i];
-        }
-    });
-
-    clone.querySelectorAll('tbody tr').forEach(row => {
-        row.querySelectorAll('td').forEach((cell, idx) => {
-            if (acquiredColWidths[idx]) {
-                cell.style.width    = acquiredColWidths[idx];
-                cell.style.maxWidth = acquiredColWidths[idx];
-            }
-            cell.style.whiteSpace    = 'normal';
-            cell.style.wordWrap      = 'break-word';
-            cell.style.overflowWrap  = 'break-word';
-            cell.style.overflow      = 'hidden';
-            cell.style.verticalAlign = 'middle';
-            cell.style.padding       = '7px 5px';
-            cell.style.fontSize      = '11px';
-            cell.style.lineHeight    = '1.4';
-            cell.style.boxSizing     = 'border-box';
-
-            // Subject column (0-indexed 4): ensure native CSS word-wrap renders fully
-            if (idx === 4) {
-                cell.style.textAlign = 'left';
-                cell.style.overflow  = 'visible';
-                cell.style.height    = 'auto';
-
-                // Fallback: If it's pure text (no divs appended by ces.forEach), apply fallback wrap
-                if (!cell.querySelector('div')) {
-                    const text = cell.textContent.trim();
-                    if (text) {
-                        const words = text.split(/\s+/).filter(Boolean);
-                        const chunks = [];
-                        for (let j = 0; j < words.length; j += 6) {
-                            chunks.push(words.slice(j, j + 6).join(' '));
-                        }
-                        cell.innerHTML = chunks.join('<br>');
-                        cell.style.whiteSpace = 'normal';
-                    }
+    // ── 5. Assemble HTML string ────────────────────────────────────────────
+    const htmlContent = `
+        <div style="font-family: Arial, sans-serif; padding: 10mm; background: white; width: 400mm;">
+            <style>
+                .pdf-print-area table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+                .pdf-print-area th { 
+                    background-color: #34495e !important; color: white !important; 
+                    padding: 6px; font-size: 10px; border: 1px solid #2c3e50; 
+                    text-align: center; word-wrap: break-word; 
                 }
-            }
-        });
-    });
-
-    const style = document.createElement('style');
-    style.textContent = `
-        * { box-sizing: border-box !important; }
-
-        table {
-            width: 100% !important;
-            border-collapse: collapse !important;
-            font-family: Arial, "Segoe UI", sans-serif !important;
-            font-size: 11px !important;
-            table-layout: fixed !important;
-            position: static !important;
-            bottom: auto !important;
-            left: auto !important;
-            margin: 0 !important;
-        }
-
-        thead { display: table-header-group !important; }
-        tbody { display: table-row-group !important; }
-        tr { page-break-inside: avoid !important; break-inside: avoid !important; }
-
-        th {
-            background-color: #34495e !important;
-            color: white !important;
-            padding: 8px 5px !important;
-            text-align: center !important;
-            font-weight: 700 !important;
-            border: 1px solid #2c3e50 !important;
-            font-size: 11px !important;
-            word-wrap: break-word !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-        }
-
-        td {
-            border: 1px solid #ccc !important;
-            padding: 7px 5px !important;
-            vertical-align: middle !important;
-            text-align: center !important;
-            font-size: 11px !important;
-            line-height: 1.4 !important;
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
-            overflow: visible !important;
-            text-overflow: clip !important;
-            white-space: normal !important;
-        }
-
-        tbody tr:nth-child(even) td {
-            background-color: #f5f5f5 !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-        }
-
-        td:first-child {
-            background-color: #ecf0f1 !important;
-            font-weight: 700 !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-        }
-
-        /* 7 columns — A3 landscape ~420mm usable width */
-        th:nth-child(1), td:nth-child(1) { width: 5%  !important; }
-        th:nth-child(2), td:nth-child(2) { width: 10% !important; }
-        th:nth-child(3), td:nth-child(3) { width: 18% !important; }
-        th:nth-child(4), td:nth-child(4) { width: 12% !important; }
-
-        /* Subject column — wraps text */
-        th:nth-child(5), td:nth-child(5) {
-            width: 25% !important;
-            white-space: normal !important;
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
-            text-align: left !important;
-        }
-
-        th:nth-child(6), td:nth-child(6) { width: 13% !important; }
-        th:nth-child(7), td:nth-child(7) { width: 17% !important; }
+                .pdf-print-area td { 
+                    border: 1px solid #ccc; padding: 5px; font-size: 10px; 
+                    line-height: 1.4; word-wrap: break-word; vertical-align: top; 
+                    white-space: normal; overflow-wrap: break-word; 
+                }
+                .pdf-print-area td:first-child { text-align: center; font-weight: bold; background-color: #ecf0f1; }
+                .pdf-print-area tr:nth-child(even) td { background-color: #f9f9f9; }
+            </style>
+            <h2 style="text-align: center; font-size: 14px; margin: 0 0 5px; color: #1a2e44;">DAK Acquired Register</h2>
+            <div style="text-align: center; font-size: 10px; color: #555; margin-bottom: 10px;">Printed on ${new Date().toLocaleDateString('en-IN')} &nbsp;|&nbsp; ${meaningfulRows.length} record(s)</div>
+            <div class="pdf-print-area">
+                <table>${thead}${tbody}</table>
+            </div>
+        </div>
     `;
-    // Inject PDF styles into <head> so html2canvas can pick them up correctly
-    style.setAttribute('data-pdf-style', 'acquired');
-    document.head.appendChild(style);
-
-    const stage = document.createElement('div');
-    stage.style.cssText = 'position:fixed;top:0;left:0;width:297mm;z-index:-99999;background:white;overflow:visible;pointer-events:none;';
-    stage.appendChild(clone);
-    document.body.appendChild(stage);
 
     const opt = {
         margin: [5, 5, 5, 5],
         filename: `DAK_Acquired_${new Date().toISOString().split('T')[0]}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-            scale: 2,
-            useCORS: true,
-            logging: false,
-            backgroundColor: '#ffffff',
-            scrollX: 0,
-            scrollY: 0
-        },
-        jsPDF: {
-            unit: 'mm',
-            format: 'a3',
-            orientation: 'landscape',
-            compress: true
-        },
-        pagebreak: {
-            mode: ['avoid-all', 'css', 'legacy'],
-            avoid: 'tr'
-        }
+        html2canvas: { scale: 2, useCORS: true, logging: false, scrollX: 0, scrollY: 0 },
+        jsPDF: { unit: 'mm', format: 'a3', orientation: 'landscape', compress: true },
+        pagebreak: { mode: ['css','legacy'], avoid: 'tr' }
     };
 
-    html2pdf()
-        .set(opt)
-        .from(clone)
-        .save()
+    html2pdf().set(opt).from(htmlContent).save()
         .then(() => {
-            document.body.removeChild(stage);
-            document.querySelector('style[data-pdf-style="acquired"]')?.remove();
             showNotification('PDF exported successfully!', 'success');
         })
         .catch(err => {
-            document.body.removeChild(stage);
-            document.querySelector('style[data-pdf-style="acquired"]')?.remove();
-            console.error('PDF error:', err);
             showNotification('Error generating PDF: ' + err.message, 'error');
         });
 }
+
+
+
+
+//=====================================
+// REBUILD DATA FOR NO OF ENTRIES
+//===================================== 
+
 
 
 //=====================================
@@ -1759,17 +1680,14 @@ function rebuildTable() {
 
     const requiredRows = entriesPerPage * currentPage;
     while (tableData.length < requiredRows) {
-        const rowData = {
-            acquiredDate: '',
-            receivedFrom: '',
-            receivedFromHindi: '',
-            letterNumber: '',
-            subject: '',
-            subjectHindi: '',
-            signature: '',
-            letterLanguage: ''
-        };
-        tableData.push(rowData);
+        tableData.push({
+            letterDate: '', acquiredOn: '',
+            officeName: '', officeNameHindi: '',
+            specificPerson: '', specificPersonHindi: '',
+            letterNo: '',
+            subject: '', subjectHindi: '',
+            letterLanguage: '', zone: '', acquisitionMethod: ''
+        });
     }
 
     const startIdx = (currentPage - 1) * entriesPerPage;
@@ -1784,41 +1702,63 @@ function rebuildTable() {
             return text && (text.includes('<strong>') || text.includes('<em>') || text.includes('<u>'));
         };
         
-        const createCellContent = (field, value, isEnglish = true, isDate = false, isSignature = false) => {
+        const createCellContent = (field, value, isEnglish = true, isDate = false, isShort = false) => {
             const className = isEnglish ? 'cell english-cell' : 'cell hindi-cell';
-            const placeholder = isDate ? 'Enter date...' : (isSignature ? 'Signature...' : (isEnglish ? 'Enter text...' : 'Hindi translation...'));
-            const required = (isDate || (isEnglish && !field.endsWith('Hindi') && !isSignature)) ? 'required' : '';
-            const disabled = !isEnglish && !value ? 'disabled' : '';
+            const isHindi = !isEnglish;
+            const placeholder = isDate ? 'DD/MM/YYYY' : (isShort ? 'Enter Information...' : (isEnglish ? 'Enter Information...' : 'Hindi translation...'));
+            const required = isEnglish && !isHindi ? 'required' : '';
+            const disabled = isHindi && !value ? 'disabled' : '';
             
             if (hasHTMLFormatting(value)) {
-                return `<div contenteditable="true" class="${className}" data-row="${startIdx + index}" data-field="${field}" style="width: 100%; min-height: 53px; height: auto; padding: 12px; border: none; outline: none; resize: none;">${value || ''}</div>`;
-            } else if (isDate || isSignature || field === 'letterNumber') {
-                return `<input type="text" class="${className}" ${required} data-row="${startIdx + index}" data-field="${field}" placeholder="${placeholder}" value="${value || ''}" style="height: 53px; resize: none;">`;
+                return `<div contenteditable="true" class="${className}" data-row="${startIdx + index}" data-field="${field}" style="width:100%;min-height:53px;height:auto;padding:12px;border:none;outline:none;resize:none;">${value || ''}</div>`;
+            } else if (isDate || isShort) {
+                return `<input type="text" class="${className}" ${required} data-row="${startIdx + index}" data-field="${field}" placeholder="${placeholder}" value="${value || ''}" style="height:53px;resize:none;">`;
             } else {
-                return `<textarea class="${className}" ${required} data-row="${startIdx + index}" data-field="${field}" placeholder="${placeholder}" ${disabled} rows="2" style="resize: vertical; min-height: 53px; height: auto;">${value || ''}</textarea>`;
+                return `<textarea class="${className}" ${required} data-row="${startIdx + index}" data-field="${field}" placeholder="${placeholder}" ${disabled} rows="2" style="resize:vertical;min-height:53px;height:auto;">${value || ''}</textarea>`;
             }
         };
+
+        const r = startIdx + index;
+        const chk = (field, val) => rowData[field] === val ? 'checked' : '';
         
         row.innerHTML = `
             <td class="row-number">${serialNumber}</td>
-            <td>${createCellContent('acquiredDate', rowData.acquiredDate, true, true)}</td>
+            <td>${createCellContent('letterDate',   rowData.letterDate,   true, true)}</td>
+            <td>${createCellContent('acquiredOn',   rowData.acquiredOn,   true, true)}</td>
             <td>
-                ${createCellContent('receivedFrom', rowData.receivedFrom, true, false)}
-                ${createCellContent('receivedFromHindi', rowData.receivedFromHindi, false, false)}
+                ${createCellContent('officeName',      rowData.officeName,      true)}
+                ${createCellContent('officeNameHindi', rowData.officeNameHindi, false)}
             </td>
             <td>
-                ${createCellContent('letterNumber', rowData.letterNumber, true, false)}
+                ${createCellContent('specificPerson',      rowData.specificPerson,      true, false, true)}
+                ${createCellContent('specificPersonHindi', rowData.specificPersonHindi, false)}
             </td>
             <td>
-                ${createCellContent('subject', rowData.subject, true, false)}
-                ${createCellContent('subjectHindi', rowData.subjectHindi, false, false)}
+                <div class="radio-cell" data-row="${r}" data-field="letterLanguage">
+                    <label class="radio-label"><input type="radio" name="acq_letterLanguage_${r}" value="Hindi"     ${chk('letterLanguage','Hindi')}     onchange="saveRadioValue(this)"> Hindi</label>
+                    <label class="radio-label"><input type="radio" name="acq_letterLanguage_${r}" value="English"  ${chk('letterLanguage','English')}  onchange="saveRadioValue(this)"> English</label>
+                    <label class="radio-label"><input type="radio" name="acq_letterLanguage_${r}" value="Bilingual" ${chk('letterLanguage','Bilingual')} onchange="saveRadioValue(this)"> Bilingual</label>
+                </div>
             </td>
-            <td>${createCellContent('signature', rowData.signature, true, false, true)}</td>
             <td>
-                <div class="radio-cell" data-row="${startIdx + index}" data-field="letterLanguage">
-                    <label class="radio-label"><input type="radio" name="acq_letterLanguage_${startIdx + index}" value="Hindi" ${rowData.letterLanguage === 'Hindi' ? 'checked' : ''} onchange="saveRadioValue(this)"> Hindi</label>
-                    <label class="radio-label"><input type="radio" name="acq_letterLanguage_${startIdx + index}" value="English" ${rowData.letterLanguage === 'English' ? 'checked' : ''} onchange="saveRadioValue(this)"> English</label>
-                    <label class="radio-label"><input type="radio" name="acq_letterLanguage_${startIdx + index}" value="Bilingual" ${rowData.letterLanguage === 'Bilingual' ? 'checked' : ''} onchange="saveRadioValue(this)"> Bilingual</label>
+                <div class="radio-cell" data-row="${r}" data-field="zone">
+                    <label class="radio-label"><input type="radio" name="acq_zone_${r}" value="Zone A" ${chk('zone','Zone A')} onchange="saveRadioValue(this)"> Zone A</label>
+                    <label class="radio-label"><input type="radio" name="acq_zone_${r}" value="Zone B" ${chk('zone','Zone B')} onchange="saveRadioValue(this)"> Zone B</label>
+                    <label class="radio-label"><input type="radio" name="acq_zone_${r}" value="Zone C" ${chk('zone','Zone C')} onchange="saveRadioValue(this)"> Zone C</label>
+                </div>
+            </td>
+            <td>${createCellContent('letterNo', rowData.letterNo, true, false, false)}</td>
+            <td>
+                ${createCellContent('subject',      rowData.subject,      true)}
+                ${createCellContent('subjectHindi', rowData.subjectHindi, false)}
+            </td>
+            <td>
+                <div class="radio-cell" data-row="${r}" data-field="acquisitionMethod">
+                    <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${r}" value="Speed Post"      ${chk('acquisitionMethod','Speed Post')}      onchange="saveRadioValue(this)"> Speed Post</label>
+                    <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${r}" value="Registered Post" ${chk('acquisitionMethod','Registered Post')} onchange="saveRadioValue(this)"> Registered Post</label>
+                    <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${r}" value="Hand Delivery"   ${chk('acquisitionMethod','Hand Delivery')}   onchange="saveRadioValue(this)"> Hand Delivery</label>
+                    <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${r}" value="Email"          ${chk('acquisitionMethod','Email')}          onchange="saveRadioValue(this)"> Email</label>
+                    <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${r}" value="E-file"         ${chk('acquisitionMethod','E-file')}         onchange="saveRadioValue(this)"> E-file</label>
                 </div>
             </td>
         `;
@@ -1832,8 +1772,6 @@ function rebuildTable() {
                 addContentEditableListeners(cell);
             }
         });
-        
-        addRowInsertionListeners(row);
     });
 
     renderPaginationControls();
@@ -1844,10 +1782,46 @@ function rebuildTable() {
 //============================================
 
 function hasRequiredFields(rowData) {
-    const requiredFields = ['acquiredDate', 'receivedFrom', 'letterNumber', 'subject', 'letterLanguage'];
-    return requiredFields.every(field => 
-        rowData[field] && rowData[field].toString().trim() !== ''
+    const requiredFields = ['letterDate', 'officeName', 'letterNo', 'subject', 'letterLanguage', 'zone', 'acquisitionMethod'];
+    const missing = requiredFields.filter(field => 
+        !rowData[field] || rowData[field].toString().trim() === ''
     );
+    if (missing.length > 0) return false;
+    
+    if (rowData.letterDate && !isValidDateString(rowData.letterDate)) return false;
+    if (rowData.acquiredOn && !isValidDateString(rowData.acquiredOn)) return false;
+    
+    return true;
+}
+
+function isRowEmpty(rowData) {
+    const meaningfulFields = ['letterDate', 'acquiredOn', 'officeName', 'specificPerson', 'letterNo', 'subject', 'letterLanguage', 'zone', 'acquisitionMethod'];
+    return meaningfulFields.every(field => !rowData[field] || rowData[field].toString().trim() === '');
+}
+
+function validateNoMiddleEmptyRows() {
+    syncTableDataWithDOM();
+    let lastFilledIndex = -1;
+    
+    // Find the last row with any data
+    for (let i = tableData.length - 1; i >= 0; i--) {
+        if (!isRowEmpty(tableData[i])) {
+            lastFilledIndex = i;
+            break;
+        }
+    }
+    
+    if (lastFilledIndex === -1) return true; // all empty, nothing to validate
+    
+    // Check every row from 0 to lastFilledIndex — none can be empty
+    for (let i = 0; i <= lastFilledIndex; i++) {
+        if (isRowEmpty(tableData[i])) {
+            alert(`Row ${i + 1} is empty but row ${lastFilledIndex + 1} has data.\nPlease fill rows sequentially from top to bottom.\nRow ${i + 1} must be completed before saving.`);
+            return false;
+        }
+    }
+    
+    return true;
 }
 
 function showNotification(message, type = 'info') {
