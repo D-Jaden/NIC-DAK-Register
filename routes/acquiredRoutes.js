@@ -46,25 +46,34 @@ router.post('/save', authenticateJWT, async (req, res) => {
                 INSERT INTO acquired (
                     serial_no, 
                     acquired_date, 
+                    acquired_on_date,
                     eng_received_from, 
-                    hi_received_from, 
+                    hi_received_from,
+                    specific_person,
+                    specific_person_hindi,
                     letter_no, 
                     eng_subject, 
                     hi_subject,
                     language,
+                    zone,
+                    acquisition_method,
                     user_id
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
             `;
-            const pgDate = formatDateForPostgres(row.acquiredDate);
             const values = [
                 row.serialNo || null,
-                pgDate,
-                row.receivedFrom || null,
-                row.receivedFromHindi || null,
-                row.letterNumber || null,  
+                row.letterDate || row.acquiredDate || null,
+                row.acquiredOn || null,
+                row.officeName || row.receivedFrom || null,
+                row.officeNameHindi || row.receivedFromHindi || null,
+                row.specificPerson || null,
+                row.specificPersonHindi || null,
+                row.letterNo || row.letterNumber || null,  
                 row.subject || null,
                 row.subjectHindi || null,
                 row.letterLanguage || null,
+                row.zone || null,
+                row.acquisitionMethod || null,
                 userId
             ];
             
@@ -105,12 +114,17 @@ router.get('/load', authenticateJWT, async (req, res) => {
                 id,
                 serial_no, 
                 acquired_date, 
+                acquired_on_date,
                 eng_received_from, 
-                hi_received_from, 
+                hi_received_from,
+                specific_person,
+                specific_person_hindi,
                 letter_no, 
                 eng_subject, 
                 hi_subject,
                 language,
+                zone,
+                acquisition_method,
                 created_at,
                 updated_at
             FROM acquired 
@@ -123,13 +137,19 @@ router.get('/load', authenticateJWT, async (req, res) => {
         const transformedData = result.rows.map(row => ({
             id: row.id,
             serialNo: row.serial_no,
-            acquiredDate: formatDateForFrontend(row.acquired_date),
-            receivedFrom: row.eng_received_from || '',
-            receivedFromHindi: row.hi_received_from || '',
-            letterNumber: row.letter_no || '', 
+            // kept both old + new names for JS compatibility
+            letterDate: row.acquired_date || '',
+            acquiredOn: row.acquired_on_date || '',
+            officeName: row.eng_received_from || '',
+            officeNameHindi: row.hi_received_from || '',
+            specificPerson: row.specific_person || '',
+            specificPersonHindi: row.specific_person_hindi || '',
+            letterNo: row.letter_no || '', 
             subject: row.eng_subject || '',
             subjectHindi: row.hi_subject || '',
             letterLanguage: row.language || '',
+            zone: row.zone || '',
+            acquisitionMethod: row.acquisition_method || '',
             isFromDatabase: true,
             hasChanges: false
         }));
@@ -173,25 +193,34 @@ router.post('/save-changes', authenticateJWT, async (req, res) => {
                 const updateQuery = `
                     UPDATE acquired SET
                         acquired_date = $1,
-                        eng_received_from = $2,
-                        hi_received_from = $3,
-                        letter_no = $4,
-                        eng_subject = $5,
-                        hi_subject = $6,
-                        language = $7,
+                        acquired_on_date = $2,
+                        eng_received_from = $3,
+                        hi_received_from = $4,
+                        specific_person = $5,
+                        specific_person_hindi = $6,
+                        letter_no = $7,
+                        eng_subject = $8,
+                        hi_subject = $9,
+                        language = $10,
+                        zone = $11,
+                        acquisition_method = $12,
                         updated_at = CURRENT_TIMESTAMP
-                    WHERE id = $8 AND user_id = $9
+                    WHERE id = $13 AND user_id = $14
                 `;
                 
-                const pgDate = formatDateForPostgres(row.acquiredDate);
                 const updateValues = [
-                    pgDate,
-                    row.receivedFrom || null,
-                    row.receivedFromHindi || null,
-                    row.letterNumber || null,
+                    row.letterDate || row.acquiredDate || null,
+                    row.acquiredOn || null,
+                    row.officeName || row.receivedFrom || null,
+                    row.officeNameHindi || row.receivedFromHindi || null,
+                    row.specificPerson || null,
+                    row.specificPersonHindi || null,
+                    row.letterNo || row.letterNumber || null,
                     row.subject || null,
                     row.subjectHindi || null,
                     row.letterLanguage || null,
+                    row.zone || null,
+                    row.acquisitionMethod || null,
                     row.id,
                     userId
                 ];
@@ -199,7 +228,6 @@ router.post('/save-changes', authenticateJWT, async (req, res) => {
                 const result = await client.query(updateQuery, updateValues);
                 if (result.rowCount > 0) {
                     updatedCount++;
-                } else {
                 }
             }
         }
@@ -211,29 +239,38 @@ router.post('/save-changes', authenticateJWT, async (req, res) => {
                     INSERT INTO acquired (
                         serial_no,
                         acquired_date,
+                        acquired_on_date,
                         eng_received_from,
                         hi_received_from,
+                        specific_person,
+                        specific_person_hindi,
                         letter_no,
                         eng_subject,
                         hi_subject,
                         language,
+                        zone,
+                        acquisition_method,
                         user_id,
                         created_at,
                         updated_at
-                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                     RETURNING id
                 `;
                 
-                const pgDate = formatDateForPostgres(row.acquiredDate);
                 const insertValues = [
                     row.serialNo,
-                    pgDate,
-                    row.receivedFrom || null,
-                    row.receivedFromHindi || null,
-                    row.letterNumber || null, 
+                    row.letterDate || row.acquiredDate || null,
+                    row.acquiredOn || null,
+                    row.officeName || row.receivedFrom || null,
+                    row.officeNameHindi || row.receivedFromHindi || null,
+                    row.specificPerson || null,
+                    row.specificPersonHindi || null,
+                    row.letterNo || row.letterNumber || null, 
                     row.subject || null,
                     row.subjectHindi || null,
                     row.letterLanguage || null,
+                    row.zone || null,
+                    row.acquisitionMethod || null,
                     userId
                 ];
                 
@@ -282,7 +319,7 @@ router.get('/stats', authenticateJWT, async (req, res) => {
         
         // Add date filtering if provided
         if (req.query.from_date && req.query.to_date) {
-            dateFilter = `AND acquired_date >= $2 AND acquired_date <= $3`;
+            dateFilter = `AND TO_DATE(NULLIF(acquired_date, ''), 'DD/MM/YYYY') >= $2::date AND TO_DATE(NULLIF(acquired_date, ''), 'DD/MM/YYYY') <= $3::date`;
             params.push(req.query.from_date, req.query.to_date);
         }
 
@@ -319,21 +356,44 @@ router.get('/stats', authenticateJWT, async (req, res) => {
         const monthParams = [userId];
         let monthFilter = '';
         if (req.query.from_date && req.query.to_date) {
-            monthFilter = `AND acquired_date >= $2 AND acquired_date <= $3`;
+            monthFilter = `AND TO_DATE(NULLIF(acquired_date, ''), 'DD/MM/YYYY') >= $2::date AND TO_DATE(NULLIF(acquired_date, ''), 'DD/MM/YYYY') <= $3::date`;
             monthParams.push(req.query.from_date, req.query.to_date);
         } else {
-            monthFilter = `AND acquired_date >= CURRENT_DATE - INTERVAL '12 months'`;
+            monthFilter = `AND TO_DATE(NULLIF(acquired_date, ''), 'DD/MM/YYYY') >= CURRENT_DATE - INTERVAL '12 months'`;
         }
 
         const byMonth = await pool.query(
             `SELECT 
-                TO_CHAR(acquired_date, 'YYYY-MM') as month,
+                TO_CHAR(TO_DATE(NULLIF(acquired_date, ''), 'DD/MM/YYYY'), 'YYYY-MM') as month,
                 COUNT(*) as count 
              FROM acquired 
-             WHERE user_id = $1 ${monthFilter}
+             WHERE user_id = $1 AND acquired_date != '' AND acquired_date IS NOT NULL ${monthFilter}
              GROUP BY month 
              ORDER BY month ASC`,
             monthParams
+        );
+
+        // 5. Total Letters by Zone
+        const byZone = await pool.query(
+            `SELECT zone, COUNT(*) as count 
+             FROM acquired 
+             WHERE user_id = $1 ${dateFilter} 
+             GROUP BY zone
+             ORDER BY count DESC`,
+            params
+        );
+
+        // 6. Zone Breakdown by Language
+        const zoneByLanguage = await pool.query(
+            `SELECT 
+                zone,
+                language,
+                COUNT(*) as count
+             FROM acquired
+             WHERE user_id = $1 AND zone IS NOT NULL ${dateFilter}
+             GROUP BY zone, language
+             ORDER BY zone ASC, language ASC`,
+            params
         );
 
         res.json({
@@ -341,7 +401,9 @@ router.get('/stats', authenticateJWT, async (req, res) => {
             total,
             byLanguage: byLanguage.rows,
             bySender: bySender.rows,
-            byMonth: byMonth.rows
+            byMonth: byMonth.rows,
+            byZone: byZone.rows,
+            zoneByLanguage: zoneByLanguage.rows
         });
 
     } catch (error) {
