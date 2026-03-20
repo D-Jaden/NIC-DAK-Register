@@ -65,7 +65,7 @@ async function makeAuthenticatedRequest(url, options = {}) {
 
     try {
         const response = await fetch(url, mergedOptions);
-        
+
         // Handle token expiration
         if (response.status === 401 || response.status === 403) {
             removeAuthToken();
@@ -73,7 +73,7 @@ async function makeAuthenticatedRequest(url, options = {}) {
             window.location.href = 'login.html';
             return null;
         }
-        
+
         return response;
     } catch (error) {
         console.error('API request failed:', error);
@@ -82,12 +82,12 @@ async function makeAuthenticatedRequest(url, options = {}) {
 }
 
 // Initialize auth check on page load
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Check if current page requires authentication
     const currentPage = window.location.pathname;
     const publicPages = ['login.html', '/login.html', '/', '/index.html'];
-    
+
     if (!publicPages.some(page => currentPage.endsWith(page) || currentPage === page)) {
-        requireAuth();
+        // requireAuth();
     }
 });
