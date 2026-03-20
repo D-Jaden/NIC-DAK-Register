@@ -14,10 +14,12 @@
 <!-- ═══════════════════════════════════════ TOP BAR ══════════ -->
 <header class="topbar">
   <div class="topbar-left">
-    <div class="topbar-logo">📊</div>
+    <div class="nic-logo">
+      <img src="images/NIC Logo JPG/ICONIC_SQUARE_NIC_Logo_white_bg-01.jpg" alt="NIC Logo" width="100%" height="100%">
+    </div>
     <div>
-      <h1>DAK Register — Analytics</h1>
-      <div class="topbar-subtitle">Despatch letter statistics &amp; trends</div>
+      <h1>DAK Delivered Dashboard</h1>
+      <div class="topbar-subtitle">Delivered letter statistics &amp; trends</div>
     </div>
   </div>
   <div class="topbar-actions">
@@ -46,22 +48,22 @@
   <!-- ── Stat Cards ──────────────────────────────────────── -->
   <section class="stat-cards" aria-label="Summary statistics">
     <div class="stat-card c1">
-      <div class="stat-icon">📬</div>
+      <div class="stat-icon"></div>
       <div class="stat-value" id="statTotal">—</div>
       <div class="stat-label">Total Letters Sent</div>
     </div>
     <div class="stat-card c2">
-      <div class="stat-icon">📅</div>
+      <div class="stat-icon"></div>
       <div class="stat-value" id="statMonth">—</div>
       <div class="stat-label">This Month</div>
     </div>
     <div class="stat-card c3">
-      <div class="stat-icon">🗺️</div>
+      <div class="stat-icon"></div>
       <div class="stat-value" id="statZone" style="font-size:1.3rem">—</div>
       <div class="stat-label">Top Zone</div>
     </div>
     <div class="stat-card c4">
-      <div class="stat-icon">🚚</div>
+      <div class="stat-icon"></div>
       <div class="stat-value" id="statMethod" style="font-size:1.1rem">—</div>
       <div class="stat-label">Most Used Method</div>
     </div>
@@ -88,6 +90,16 @@
         <canvas id="chartMethod"></canvas>
       </div>
       <ul class="legend-list" id="legendMethod"></ul>
+    </div>
+
+    <!-- Zone + Language Combined -->
+    <div class="chart-card">
+      <div class="chart-title">Zone & Language</div>
+      <div class="chart-subtitle">Combined distribution of sent letters</div>
+      <div class="chart-container">
+        <canvas id="chartZoneLang"></canvas>
+      </div>
+      <ul class="legend-list" id="legendZoneLang"></ul>
     </div>
 
     <!-- Letter Language -->
