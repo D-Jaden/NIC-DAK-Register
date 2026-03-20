@@ -14,7 +14,9 @@
 <!-- ═══════════════════════════════════════ TOP BAR ══════════ -->
 <header class="topbar">
   <div class="topbar-left">
-    <div class="topbar-logo">📥</div>
+    <div class="nic-logo">
+      <img src="images/NIC Logo JPG/ICONIC_SQUARE_NIC_Logo_white_bg-01.jpg" alt="NIC Logo" width="100%" height="100%">
+    </div>
     <div>
       <h1>Acquired Register — Analytics</h1>
       <div class="topbar-subtitle">Received letters statistics &amp; trends</div>
@@ -62,7 +64,7 @@
     </div>
   </section>
 
-  <!-- ── Charts Row 1: 3 Charts ──────────────────────── -->
+    <!-- ── Charts Row 1: 3 Charts ──────────────────────── -->
   <div class="charts-grid">
 
     <!-- Letter Language -->
@@ -94,6 +96,29 @@
     </div>
 
   </div><!-- /.charts-grid -->
+
+    <!-- ── Charts Row 2: Zone Charts ──────────────────────── -->
+    <div class="charts-grid" style="margin-top: 2rem;">
+        
+        <!-- Letters by Zone -->
+        <div class="chart-card">
+        <div class="chart-title">Letters by Zone</div>
+        <div class="chart-subtitle">Total letters received from each zone</div>
+        <div class="chart-container" style="min-height:260px">
+            <canvas id="chartZone"></canvas>
+        </div>
+        </div>
+
+        <!-- Zone Breakdown by Language -->
+        <div class="chart-card wide">
+        <div class="chart-title">Zone Breakdown by Language</div>
+        <div class="chart-subtitle">Language distribution within each zone</div>
+        <div class="chart-container" style="min-height:260px">
+            <canvas id="chartZoneLang"></canvas>
+        </div>
+        </div>
+        
+    </div><!-- /.charts-grid -->
 
 </main>
 
