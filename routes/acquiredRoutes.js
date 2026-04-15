@@ -332,10 +332,10 @@ router.get('/stats', authenticateJWT, async (req, res) => {
 
         // 2. By Language (Hindi, English, Bilingual)
         const byLanguage = await pool.query(
-            `SELECT language, COUNT(*) as count 
+            `SELECT unnest(string_to_array(COALESCE(NULLIF(language, ''), 'Unknown'), ', ')) as language, COUNT(*) as count 
              FROM acquired 
              WHERE user_id = $1 ${dateFilter} 
-             GROUP BY language`,
+             GROUP BY 1`,
             params
         );
 
@@ -375,10 +375,10 @@ router.get('/stats', authenticateJWT, async (req, res) => {
 
         // 5. Total Letters by Zone
         const byZone = await pool.query(
-            `SELECT zone, COUNT(*) as count 
+            `SELECT unnest(string_to_array(COALESCE(NULLIF(zone, ''), 'Not Set'), ', ')) as zone, COUNT(*) as count 
              FROM acquired 
              WHERE user_id = $1 ${dateFilter} 
-             GROUP BY zone
+             GROUP BY 1
              ORDER BY count DESC`,
             params
         );
@@ -386,13 +386,13 @@ router.get('/stats', authenticateJWT, async (req, res) => {
         // 6. Zone Breakdown by Language
         const zoneByLanguage = await pool.query(
             `SELECT 
-                zone,
+                unnest(string_to_array(zone, ', ')) as zone,
                 language,
                 COUNT(*) as count
              FROM acquired
-             WHERE user_id = $1 AND zone IS NOT NULL ${dateFilter}
-             GROUP BY zone, language
-             ORDER BY zone ASC, language ASC`,
+             WHERE user_id = $1 AND coalesce(zone, '') != '' ${dateFilter}
+             GROUP BY 1, language
+             ORDER BY 1 ASC, language ASC`,
             params
         );
 
