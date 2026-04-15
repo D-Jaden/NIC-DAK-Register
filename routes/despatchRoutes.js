@@ -264,18 +264,18 @@ router.get('/stats', authenticateJWT, async (req, res) => {
         const base = `FROM despatch WHERE user_id = $1 ${dateFilter}`;
 
         const totalResult  = await pool.query(`SELECT COUNT(*) as total ${base}`, params);
-        const zoneResult   = await pool.query(`SELECT COALESCE(zone,'Not Set') as label, COUNT(*) as count ${base} GROUP BY zone ORDER BY count DESC`, params);
+        const zoneResult   = await pool.query(`SELECT unnest(string_to_array(COALESCE(NULLIF(zone, ''), 'Not Set'), ', ')) as label, COUNT(*) as count ${base} GROUP BY 1 ORDER BY count DESC`, params);
         
         // NEW COMBINED QUERY -> Zone + Language
         const zoneLangResult = await pool.query(`
-            SELECT CONCAT(COALESCE(zone,'Not Set'), ' (', COALESCE(language,'Not Set'), ')') as label, COUNT(*) as count 
+            SELECT CONCAT(unnest(string_to_array(COALESCE(NULLIF(zone, ''), 'Not Set'), ', ')), ' (', COALESCE(NULLIF(language, ''), 'Not Set'), ')') as label, COUNT(*) as count 
             ${base} 
-            GROUP BY zone, language 
+            GROUP BY 1 
             ORDER BY count DESC
         `, params);
 
-        const methodResult = await pool.query(`SELECT COALESCE(delivery_method,'Not Set') as label, COUNT(*) as count ${base} GROUP BY delivery_method ORDER BY count DESC`, params);
-        const langResult   = await pool.query(`SELECT COALESCE(language,'Not Set') as label, COUNT(*) as count ${base} GROUP BY language ORDER BY count DESC`, params);
+        const methodResult = await pool.query(`SELECT unnest(string_to_array(COALESCE(NULLIF(delivery_method, ''), 'Not Set'), ', ')) as label, COUNT(*) as count ${base} GROUP BY 1 ORDER BY count DESC`, params);
+        const langResult   = await pool.query(`SELECT unnest(string_to_array(COALESCE(NULLIF(language, ''), 'Not Set'), ', ')) as label, COUNT(*) as count ${base} GROUP BY 1 ORDER BY count DESC`, params);
         const placeResult  = await pool.query(`SELECT COALESCE(eng_place,'Not Set') as label, COUNT(*) as count ${base} AND eng_place IS NOT NULL AND eng_place != '' GROUP BY eng_place ORDER BY count DESC LIMIT 10`, params);
         const monthResult  = await pool.query(`
             SELECT letter_date as label, letter_date as sort_key, COUNT(*) as count
