@@ -124,7 +124,7 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 15px;
-    border: 1px solid #e1e8ed;
+    border: 1px solid #556b82;
 }
 
 /* Base button groups */
@@ -165,7 +165,7 @@ body {
     height: 38px;
     background: #fff;
     color: #333;
-    border: 1px solid #e1e8ed;
+    border: 1px solid #556b82;
     border-radius: 5px;
     padding: 0 10px;
     outline: none;
@@ -192,7 +192,7 @@ body {
     width: 38px;
     background-color: #fff;
     color: #333;
-    border: 1px solid #e1e8ed;
+    border: 1px solid #556b82;
     border-radius: 5px;
     cursor: pointer;
     transition: all 0.2s;
@@ -266,7 +266,7 @@ body {
     width: 76px;
     height: 70px;
     border-radius: 5px;
-    border: 1px solid #e1e8ed;
+    border: 1px solid #556b82;
     color: #2196f3;
 }
 
@@ -327,7 +327,7 @@ body {
     right: 0;
     min-width: 160px;
     background: white;
-    border: 1px solid #e1e8ed;
+    border: 1px solid #556b82;
     border-radius: 4px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     z-index: 1000;
@@ -408,7 +408,7 @@ body {
 
 .excel-table td {
     padding: 0;
-    border: 1px solid #e1e8ed;
+    border: 1px solid #556b82;
     background: white;
     transition: all 0.3s ease;
     overflow-wrap: break-word;
@@ -437,24 +437,24 @@ body {
 .excel-table th.row-number      { min-width: 55px;  width: 55px; }
 .excel-table th.letterDate,
 .excel-table th.acquiredOn      { min-width: 160px; }
-.excel-table th.officeName      { min-width: 260px; }
-.excel-table th.specificPerson  { min-width: 190px; }
+.excel-table th.officeName      { min-width: 200px; }
+.excel-table th.specificPerson  { min-width: 250px; }
 .excel-table th.letterLanguage  { min-width: 160px; }
-.excel-table th.zone            { min-width: 150px; }
-.excel-table th.letterNo        { min-width: 250px; }
-.excel-table th.subject         { min-width: 500px; }
+.excel-table th.zone            { min-width: 190px; }
+.excel-table th.letterNo        { min-width: 180px; }
+.excel-table th.subject         { min-width: 480px; }
 .excel-table th.acquisitionMethod { min-width: 190px; }
 
 /* Ensure td widths match th widths */
 .excel-table td:nth-child(1)  { min-width: 55px; }
 .excel-table td:nth-child(2)  { min-width: 160px; }
 .excel-table td:nth-child(3)  { min-width: 160px; }
-.excel-table td:nth-child(4)  { min-width: 260px; }
-.excel-table td:nth-child(5)  { min-width: 190px; }
-.excel-table td:nth-child(6)  { min-width: 160px; }
-.excel-table td:nth-child(7)  { min-width: 150px; }
-.excel-table td:nth-child(8)  { min-width: 250px; }
-.excel-table td:nth-child(9)  { min-width: 500px; }
+.excel-table td:nth-child(4)  { min-width: 180px; }
+.excel-table td:nth-child(5)  { min-width: 200px; }
+.excel-table td:nth-child(6)  { min-width: 250px; }
+.excel-table td:nth-child(7)  { min-width: 480px; }
+.excel-table td:nth-child(8)  { min-width: 160px; }
+.excel-table td:nth-child(9)  { min-width: 190px; }
 .excel-table td:nth-child(10) { min-width: 190px; }
 
 .cell {
@@ -493,7 +493,7 @@ body {
     transition: all 0.3s ease;
     display: block;
     text-align: left;
-    border-top: 1px solid #e1e8ed;
+    border-top: 1px solid #556b82;
     overflow-wrap: break-word;
     word-wrap: break-word;
     white-space: pre-wrap;
@@ -620,7 +620,7 @@ body {
 .sort-dropdown {
     position: fixed;
     background: white;
-    border: 1px solid #e1e8ed;
+    border: 1px solid #556b82;
     border-radius: 4px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     z-index: 99999;
@@ -683,7 +683,7 @@ body {
 .search-btn {
     flex: 1;
     padding: 4px 8px;
-    border: 1px solid #e1e8ed;
+    border: 1px solid #556b82;
     background: rgb(75, 151, 214);
     color: white;
     border-radius: 3px;
@@ -766,7 +766,7 @@ body {
 /*----------------------------------------------ROW INSERTION--------------------------------------------------------------*/
 .context-menu {
     background: white;
-    border: 1px solid #e1e8ed;
+    border: 1px solid #556b82;
     border-radius: 4px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 4px 0;
@@ -928,7 +928,7 @@ body {
         width: auto;
         height: auto;
         background-color: white;
-        border: 1px solid #e1e8ed;
+        border: 1px solid #556b82;
         border-radius: 8px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
         z-index: 1000;
