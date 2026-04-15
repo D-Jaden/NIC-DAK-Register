@@ -589,42 +589,44 @@ function addNewRow() {
     
     row.innerHTML = `
         <td class="row-number">${rowCount}</td>
-        <td><input type="text" class="cell english-cell" required data-row="${rowCount-1}" data-field="letterDate" placeholder="DD/MM/YYYY" style="height: 53px;"></td>
-        <td><input type="text" class="cell english-cell" data-row="${rowCount-1}" data-field="acquiredOn" placeholder="DD/MM/YYYY" style="height: 53px;"></td>
+        <td><input type="text" class="cell english-cell" required data-row="${rowCount - 1}" data-field="letterDate" placeholder="DD/MM/YYYY" style="height: 53px;"></td>
+        <td><input type="text" class="cell english-cell" required data-row="${rowCount - 1}" data-field="acquiredOn" placeholder="DD/MM/YYYY" style="height: 53px;"></td>
         <td>
-            <textarea class="cell english-cell" required data-row="${rowCount-1}" data-field="officeName" placeholder="Office / Dept name..." style="resize: vertical;"></textarea>
-            <textarea class="cell hindi-cell" data-row="${rowCount-1}" data-field="officeNameHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
+            <textarea class="cell english-cell" required data-row="${rowCount - 1}" data-field="letterNo" placeholder="e.g. NIC/2025/001" style="resize: vertical; min-height: 53px;"></textarea>
         </td>
         <td>
-            <input type="text" class="cell english-cell" data-row="${rowCount-1}" data-field="specificPerson" placeholder="Person name..." style="height: 53px;">
-            <textarea class="cell hindi-cell" data-row="${rowCount-1}" data-field="specificPersonHindi" placeholder="Hindi translation..." disabled style="resize: vertical; min-height:30px;"></textarea>
+            <textarea class="cell english-cell" required data-row="${rowCount - 1}" data-field="officeName" placeholder="Enter department..." style="resize: vertical;"></textarea>
+            <textarea class="cell hindi-cell" data-row="${rowCount - 1}" data-field="officeNameHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
         </td>
         <td>
-            <div class="radio-cell" data-row="${rowCount-1}" data-field="letterLanguage">
-                <label class="radio-label"><input type="radio" name="acq_letterLanguage_${rowCount-1}" value="Hindi" onchange="saveRadioValue(this)"> Hindi</label>
-                <label class="radio-label"><input type="radio" name="acq_letterLanguage_${rowCount-1}" value="English" onchange="saveRadioValue(this)"> English</label>
-                <label class="radio-label"><input type="radio" name="acq_letterLanguage_${rowCount-1}" value="Bilingual" onchange="saveRadioValue(this)"> Bilingual</label>
+            <textarea class="cell english-cell" required data-row="${rowCount - 1}" data-field="specificPerson" placeholder="Enter name..." style="resize: vertical;"></textarea>
+            <textarea class="cell hindi-cell" data-row="${rowCount - 1}" data-field="specificPersonHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
+        </td>
+        <td>
+            <textarea class="cell english-cell" required data-row="${rowCount - 1}" data-field="subject" placeholder="Enter subject..." style="resize: vertical;"></textarea>
+            <textarea class="cell hindi-cell" data-row="${rowCount - 1}" data-field="subjectHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
+        </td>
+        <td>
+            <div class="radio-cell" data-row="${rowCount - 1}" data-field="letterLanguage">
+                <label class="radio-label"><input type="radio" name="letterLanguage_${rowCount - 1}" value="Hindi" onchange="saveRadioValue(this)"> Hindi</label>
+                <label class="radio-label"><input type="radio" name="letterLanguage_${rowCount - 1}" value="English" onchange="saveRadioValue(this)"> English</label>
+                <label class="radio-label"><input type="radio" name="letterLanguage_${rowCount - 1}" value="Bilingual" onchange="saveRadioValue(this)"> Bilingual</label>
             </div>
         </td>
         <td>
-            <div class="radio-cell" data-row="${rowCount-1}" data-field="zone">
-                <label class="radio-label"><input type="radio" name="acq_zone_${rowCount-1}" value="Zone A" onchange="saveRadioValue(this)"> Zone A</label>
-                <label class="radio-label"><input type="radio" name="acq_zone_${rowCount-1}" value="Zone B" onchange="saveRadioValue(this)"> Zone B</label>
-                <label class="radio-label"><input type="radio" name="acq_zone_${rowCount-1}" value="Zone C" onchange="saveRadioValue(this)"> Zone C</label>
+            <div class="radio-cell" data-row="${rowCount - 1}" data-field="zone">
+                <label class="radio-label"><input type="checkbox" name="zone_${rowCount - 1}" value="Zone A" onchange="enforceCheckboxLimit(this, 2)"> Zone A</label>
+                <label class="radio-label"><input type="checkbox" name="zone_${rowCount - 1}" value="Zone B" onchange="enforceCheckboxLimit(this, 2)"> Zone B</label>
+                <label class="radio-label"><input type="checkbox" name="zone_${rowCount - 1}" value="Zone C" onchange="enforceCheckboxLimit(this, 2)"> Zone C</label>
             </div>
         </td>
-        <td><textarea class="cell english-cell" required data-row="${rowCount-1}" data-field="letterNo" placeholder="e.g. NIC/2025/001" style="resize: vertical; min-height: 53px;"></textarea></td>
         <td>
-            <textarea class="cell english-cell" required data-row="${rowCount-1}" data-field="subject" placeholder="Enter subject..." style="resize: vertical;"></textarea>
-            <textarea class="cell hindi-cell" data-row="${rowCount-1}" data-field="subjectHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
-        </td>
-        <td>
-            <div class="radio-cell" data-row="${rowCount-1}" data-field="acquisitionMethod">
-                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${rowCount-1}" value="Speed Post" onchange="saveRadioValue(this)"> Speed Post</label>
-                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${rowCount-1}" value="Registered Post" onchange="saveRadioValue(this)"> Registered Post</label>
-                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${rowCount-1}" value="Hand Delivery" onchange="saveRadioValue(this)"> Hand Delivery</label>
-                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${rowCount-1}" value="Email" onchange="saveRadioValue(this)"> Email</label>
-                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${rowCount-1}" value="E-file" onchange="saveRadioValue(this)"> E-file</label>
+            <div class="radio-cell" data-row="${rowCount - 1}" data-field="acquisitionMethod">
+                <label class="radio-label"><input type="checkbox" name="acquisitionMethod_${rowCount - 1}" value="Speed Post" onchange="enforceCheckboxLimit(this, 3)"> Speed Post</label>
+                <label class="radio-label"><input type="checkbox" name="acquisitionMethod_${rowCount - 1}" value="Registered Post" onchange="enforceCheckboxLimit(this, 3)"> Registered Post</label>
+                <label class="radio-label"><input type="checkbox" name="acquisitionMethod_${rowCount - 1}" value="Hand Delivery" onchange="enforceCheckboxLimit(this, 3)"> Hand/Local</label>
+                <label class="radio-label"><input type="checkbox" name="acquisitionMethod_${rowCount - 1}" value="Email" onchange="enforceCheckboxLimit(this, 3)"> Email</label>
+                <label class="radio-label"><input type="checkbox" name="acquisitionMethod_${rowCount - 1}" value="E-file" onchange="enforceCheckboxLimit(this, 3)"> E-file</label>
             </div>
         </td>
     `;
@@ -681,9 +683,18 @@ function syncTableDataWithDOM() {
         const radioCells = row.querySelectorAll('.radio-cell');
         radioCells.forEach(radioCell => {
             const field = radioCell.getAttribute('data-field');
-            const checkedRadio = radioCell.querySelector('input[type="radio"]:checked');
-            if (field && tableData[dataIndex]) {
-                if (checkedRadio) tableData[dataIndex][field] = checkedRadio.value;
+            if (field) {
+                const checkboxes = radioCell.querySelectorAll('input[type="checkbox"]:checked');
+                if (checkboxes.length > 0) {
+                    tableData[dataIndex][field] = Array.from(checkboxes).map(cb => cb.value).join(', ');
+                } else {
+                    const checkedRadio = radioCell.querySelector('input[type="radio"]:checked');
+                    if (checkedRadio) {
+                        tableData[dataIndex][field] = checkedRadio.value;
+                    } else if (radioCell.querySelector('input[type="checkbox"]')) {
+                        tableData[dataIndex][field] = '';
+                    }
+                }
             }
         });
     });
@@ -846,43 +857,49 @@ function insertRowAfter(targetRow) {
     tableData.splice(targetIndex + 1, 0, rowData);
     
     newRow.innerHTML = `
-        <td class="row-number">${rowCount}</td>
+        <td class="row-number"></td>/td>
         <td><input type="text" class="cell english-cell" required data-row="${targetIndex + 1}" data-field="letterDate" placeholder="DD/MM/YYYY" style="height: 53px;"></td>
-        <td><input type="text" class="cell english-cell" data-row="${targetIndex + 1}" data-field="acquiredOn" placeholder="DD/MM/YYYY" style="height: 53px;"></td>
+        <td><input type="text" class="cell english-cell" required data-row="${targetIndex + 1}" data-field="acquiredOn" placeholder="DD/MM/YYYY" style="height: 53px;"></td>
         <td>
-            <textarea class="cell english-cell" required data-row="${targetIndex + 1}" data-field="officeName" placeholder="Office / Dept name..." style="resize: vertical;"></textarea>
+            <textarea class="cell english-cell" required data-row="${targetIndex + 1}" data-field="letterNo" placeholder="e.g. NIC/2025/001" style="resize: vertical; min-height: 53px;"></textarea>
+        </td>
+        <td>
+            <textarea class="cell english-cell" required data-row="${targetIndex + 1}" data-field="officeName" placeholder="Enter department..." style="resize: vertical;"></textarea>
             <textarea class="cell hindi-cell" data-row="${targetIndex + 1}" data-field="officeNameHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
         </td>
-        <td><input type="text" class="cell english-cell" data-row="${targetIndex + 1}" data-field="specificPerson" placeholder="Person name..." style="height: 53px;"></td>
         <td>
-            <div class="radio-cell" data-row="${targetIndex + 1}" data-field="letterLanguage">
-                <label class="radio-label"><input type="radio" name="acq_letterLanguage_${targetIndex + 1}" value="Hindi" onchange="saveRadioValue(this)"> Hindi</label>
-                <label class="radio-label"><input type="radio" name="acq_letterLanguage_${targetIndex + 1}" value="English" onchange="saveRadioValue(this)"> English</label>
-                <label class="radio-label"><input type="radio" name="acq_letterLanguage_${targetIndex + 1}" value="Bilingual" onchange="saveRadioValue(this)"> Bilingual</label>
-            </div>
+            <textarea class="cell english-cell" required data-row="${targetIndex + 1}" data-field="specificPerson" placeholder="Enter name..." style="resize: vertical;"></textarea>
+            <textarea class="cell hindi-cell" data-row="${targetIndex + 1}" data-field="specificPersonHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
         </td>
-        <td>
-            <div class="radio-cell" data-row="${targetIndex + 1}" data-field="zone">
-                <label class="radio-label"><input type="radio" name="acq_zone_${targetIndex + 1}" value="Zone A" onchange="saveRadioValue(this)"> Zone A</label>
-                <label class="radio-label"><input type="radio" name="acq_zone_${targetIndex + 1}" value="Zone B" onchange="saveRadioValue(this)"> Zone B</label>
-                <label class="radio-label"><input type="radio" name="acq_zone_${targetIndex + 1}" value="Zone C" onchange="saveRadioValue(this)"> Zone C</label>
-            </div>
-        </td>
-        <td><textarea class="cell english-cell" required data-row="${targetIndex + 1}" data-field="letterNo" placeholder="e.g. NIC/2025/001" style="resize: vertical; min-height: 53px;"></textarea></td>
         <td>
             <textarea class="cell english-cell" required data-row="${targetIndex + 1}" data-field="subject" placeholder="Enter subject..." style="resize: vertical;"></textarea>
             <textarea class="cell hindi-cell" data-row="${targetIndex + 1}" data-field="subjectHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
         </td>
         <td>
+            <div class="radio-cell" data-row="${targetIndex + 1}" data-field="letterLanguage">
+                <label class="radio-label"><input type="radio" name="letterLanguage_${targetIndex + 1}" value="Hindi" onchange="saveRadioValue(this)"> Hindi</label>
+                <label class="radio-label"><input type="radio" name="letterLanguage_${targetIndex + 1}" value="English" onchange="saveRadioValue(this)"> English</label>
+                <label class="radio-label"><input type="radio" name="letterLanguage_${targetIndex + 1}" value="Bilingual" onchange="saveRadioValue(this)"> Bilingual</label>
+            </div>
+        </td>
+        <td>
+            <div class="radio-cell" data-row="${targetIndex + 1}" data-field="zone">
+                <label class="radio-label"><input type="checkbox" name="zone_${targetIndex + 1}" value="Zone A" onchange="enforceCheckboxLimit(this, 2)"> Zone A</label>
+                <label class="radio-label"><input type="checkbox" name="zone_${targetIndex + 1}" value="Zone B" onchange="enforceCheckboxLimit(this, 2)"> Zone B</label>
+                <label class="radio-label"><input type="checkbox" name="zone_${targetIndex + 1}" value="Zone C" onchange="enforceCheckboxLimit(this, 2)"> Zone C</label>
+            </div>
+        </td>
+        <td>
             <div class="radio-cell" data-row="${targetIndex + 1}" data-field="acquisitionMethod">
-                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${targetIndex + 1}" value="Speed Post" onchange="saveRadioValue(this)"> Speed Post</label>
-                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${targetIndex + 1}" value="Registered Post" onchange="saveRadioValue(this)"> Registered Post</label>
-                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${targetIndex + 1}" value="Hand Delivery" onchange="saveRadioValue(this)"> Hand Delivery</label>
-                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${targetIndex + 1}" value="Email" onchange="saveRadioValue(this)"> Email</label>
-                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${targetIndex + 1}" value="E-file" onchange="saveRadioValue(this)"> E-file</label>
+                <label class="radio-label"><input type="checkbox" name="acquisitionMethod_${targetIndex + 1}" value="Speed Post" onchange="enforceCheckboxLimit(this, 3)"> Speed Post</label>
+                <label class="radio-label"><input type="checkbox" name="acquisitionMethod_${targetIndex + 1}" value="Registered Post" onchange="enforceCheckboxLimit(this, 3)"> Registered Post</label>
+                <label class="radio-label"><input type="checkbox" name="acquisitionMethod_${targetIndex + 1}" value="Hand Delivery" onchange="enforceCheckboxLimit(this, 3)"> Hand/Local</label>
+                <label class="radio-label"><input type="checkbox" name="acquisitionMethod_${targetIndex + 1}" value="Email" onchange="enforceCheckboxLimit(this, 3)"> Email</label>
+                <label class="radio-label"><input type="checkbox" name="acquisitionMethod_${targetIndex + 1}" value="E-file" onchange="enforceCheckboxLimit(this, 3)"> E-file</label>
             </div>
         </td>
     `;
+
     
     targetRow.parentNode.insertBefore(newRow, targetRow.nextSibling);
     
@@ -917,43 +934,49 @@ function insertRowBefore(targetRow) {
     tableData.splice(targetIndex, 0, rowData);
     
     newRow.innerHTML = `
-        <td class="row-number">${rowCount}</td>
+        <td class="row-number"></td>/td>
         <td><input type="text" class="cell english-cell" required data-row="${targetIndex}" data-field="letterDate" placeholder="DD/MM/YYYY" style="height: 53px;"></td>
-        <td><input type="text" class="cell english-cell" data-row="${targetIndex}" data-field="acquiredOn" placeholder="DD/MM/YYYY" style="height: 53px;"></td>
+        <td><input type="text" class="cell english-cell" required data-row="${targetIndex}" data-field="acquiredOn" placeholder="DD/MM/YYYY" style="height: 53px;"></td>
         <td>
-            <textarea class="cell english-cell" required data-row="${targetIndex}" data-field="officeName" placeholder="Office / Dept name..." style="resize: vertical;"></textarea>
+            <textarea class="cell english-cell" required data-row="${targetIndex}" data-field="letterNo" placeholder="e.g. NIC/2025/001" style="resize: vertical; min-height: 53px;"></textarea>
+        </td>
+        <td>
+            <textarea class="cell english-cell" required data-row="${targetIndex}" data-field="officeName" placeholder="Enter department..." style="resize: vertical;"></textarea>
             <textarea class="cell hindi-cell" data-row="${targetIndex}" data-field="officeNameHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
         </td>
-        <td><input type="text" class="cell english-cell" data-row="${targetIndex}" data-field="specificPerson" placeholder="Person name..." style="height: 53px;"></td>
         <td>
-            <div class="radio-cell" data-row="${targetIndex}" data-field="letterLanguage">
-                <label class="radio-label"><input type="radio" name="acq_letterLanguage_${targetIndex}" value="Hindi" onchange="saveRadioValue(this)"> Hindi</label>
-                <label class="radio-label"><input type="radio" name="acq_letterLanguage_${targetIndex}" value="English" onchange="saveRadioValue(this)"> English</label>
-                <label class="radio-label"><input type="radio" name="acq_letterLanguage_${targetIndex}" value="Bilingual" onchange="saveRadioValue(this)"> Bilingual</label>
-            </div>
+            <textarea class="cell english-cell" required data-row="${targetIndex}" data-field="specificPerson" placeholder="Enter name..." style="resize: vertical;"></textarea>
+            <textarea class="cell hindi-cell" data-row="${targetIndex}" data-field="specificPersonHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
         </td>
-        <td>
-            <div class="radio-cell" data-row="${targetIndex}" data-field="zone">
-                <label class="radio-label"><input type="radio" name="acq_zone_${targetIndex}" value="Zone A" onchange="saveRadioValue(this)"> Zone A</label>
-                <label class="radio-label"><input type="radio" name="acq_zone_${targetIndex}" value="Zone B" onchange="saveRadioValue(this)"> Zone B</label>
-                <label class="radio-label"><input type="radio" name="acq_zone_${targetIndex}" value="Zone C" onchange="saveRadioValue(this)"> Zone C</label>
-            </div>
-        </td>
-        <td><textarea class="cell english-cell" required data-row="${targetIndex}" data-field="letterNo" placeholder="e.g. NIC/2025/001" style="resize: vertical; min-height: 53px;"></textarea></td>
         <td>
             <textarea class="cell english-cell" required data-row="${targetIndex}" data-field="subject" placeholder="Enter subject..." style="resize: vertical;"></textarea>
             <textarea class="cell hindi-cell" data-row="${targetIndex}" data-field="subjectHindi" placeholder="Hindi translation..." disabled style="resize: vertical;"></textarea>
         </td>
         <td>
+            <div class="radio-cell" data-row="${targetIndex}" data-field="letterLanguage">
+                <label class="radio-label"><input type="radio" name="letterLanguage_${targetIndex}" value="Hindi" onchange="saveRadioValue(this)"> Hindi</label>
+                <label class="radio-label"><input type="radio" name="letterLanguage_${targetIndex}" value="English" onchange="saveRadioValue(this)"> English</label>
+                <label class="radio-label"><input type="radio" name="letterLanguage_${targetIndex}" value="Bilingual" onchange="saveRadioValue(this)"> Bilingual</label>
+            </div>
+        </td>
+        <td>
+            <div class="radio-cell" data-row="${targetIndex}" data-field="zone">
+                <label class="radio-label"><input type="checkbox" name="zone_${targetIndex}" value="Zone A" onchange="enforceCheckboxLimit(this, 2)"> Zone A</label>
+                <label class="radio-label"><input type="checkbox" name="zone_${targetIndex}" value="Zone B" onchange="enforceCheckboxLimit(this, 2)"> Zone B</label>
+                <label class="radio-label"><input type="checkbox" name="zone_${targetIndex}" value="Zone C" onchange="enforceCheckboxLimit(this, 2)"> Zone C</label>
+            </div>
+        </td>
+        <td>
             <div class="radio-cell" data-row="${targetIndex}" data-field="acquisitionMethod">
-                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${targetIndex}" value="Speed Post" onchange="saveRadioValue(this)"> Speed Post</label>
-                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${targetIndex}" value="Registered Post" onchange="saveRadioValue(this)"> Registered Post</label>
-                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${targetIndex}" value="Hand Delivery" onchange="saveRadioValue(this)"> Hand Delivery</label>
-                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${targetIndex}" value="Email" onchange="saveRadioValue(this)"> Email</label>
-                <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${targetIndex}" value="E-file" onchange="saveRadioValue(this)"> E-file</label>
+                <label class="radio-label"><input type="checkbox" name="acquisitionMethod_${targetIndex}" value="Speed Post" onchange="enforceCheckboxLimit(this, 3)"> Speed Post</label>
+                <label class="radio-label"><input type="checkbox" name="acquisitionMethod_${targetIndex}" value="Registered Post" onchange="enforceCheckboxLimit(this, 3)"> Registered Post</label>
+                <label class="radio-label"><input type="checkbox" name="acquisitionMethod_${targetIndex}" value="Hand Delivery" onchange="enforceCheckboxLimit(this, 3)"> Hand/Local</label>
+                <label class="radio-label"><input type="checkbox" name="acquisitionMethod_${targetIndex}" value="Email" onchange="enforceCheckboxLimit(this, 3)"> Email</label>
+                <label class="radio-label"><input type="checkbox" name="acquisitionMethod_${targetIndex}" value="E-file" onchange="enforceCheckboxLimit(this, 3)"> E-file</label>
             </div>
         </td>
     `;
+
     
     targetRow.parentNode.insertBefore(newRow, targetRow);
     
@@ -1719,12 +1742,13 @@ function rebuildTable() {
         };
 
         const r = startIdx + index;
-        const chk = (field, val) => rowData[field] === val ? 'checked' : '';
+        const chk = (field, val) => (rowData[field] || '').includes(val) ? 'checked' : '';
         
         row.innerHTML = `
             <td class="row-number">${serialNumber}</td>
             <td>${createCellContent('letterDate',   rowData.letterDate,   true, true)}</td>
             <td>${createCellContent('acquiredOn',   rowData.acquiredOn,   true, true)}</td>
+            <td>${createCellContent('letterNo', rowData.letterNo, true, false, false)}</td>
             <td>
                 ${createCellContent('officeName',      rowData.officeName,      true)}
                 ${createCellContent('officeNameHindi', rowData.officeNameHindi, false)}
@@ -1734,31 +1758,30 @@ function rebuildTable() {
                 ${createCellContent('specificPersonHindi', rowData.specificPersonHindi, false)}
             </td>
             <td>
-                <div class="radio-cell" data-row="${r}" data-field="letterLanguage">
-                    <label class="radio-label"><input type="radio" name="acq_letterLanguage_${r}" value="Hindi"     ${chk('letterLanguage','Hindi')}     onchange="saveRadioValue(this)"> Hindi</label>
-                    <label class="radio-label"><input type="radio" name="acq_letterLanguage_${r}" value="English"  ${chk('letterLanguage','English')}  onchange="saveRadioValue(this)"> English</label>
-                    <label class="radio-label"><input type="radio" name="acq_letterLanguage_${r}" value="Bilingual" ${chk('letterLanguage','Bilingual')} onchange="saveRadioValue(this)"> Bilingual</label>
-                </div>
-            </td>
-            <td>
-                <div class="radio-cell" data-row="${r}" data-field="zone">
-                    <label class="radio-label"><input type="radio" name="acq_zone_${r}" value="Zone A" ${chk('zone','Zone A')} onchange="saveRadioValue(this)"> Zone A</label>
-                    <label class="radio-label"><input type="radio" name="acq_zone_${r}" value="Zone B" ${chk('zone','Zone B')} onchange="saveRadioValue(this)"> Zone B</label>
-                    <label class="radio-label"><input type="radio" name="acq_zone_${r}" value="Zone C" ${chk('zone','Zone C')} onchange="saveRadioValue(this)"> Zone C</label>
-                </div>
-            </td>
-            <td>${createCellContent('letterNo', rowData.letterNo, true, false, false)}</td>
-            <td>
                 ${createCellContent('subject',      rowData.subject,      true)}
                 ${createCellContent('subjectHindi', rowData.subjectHindi, false)}
             </td>
             <td>
+                <div class="radio-cell" data-row="${r}" data-field="letterLanguage">
+                    <label class="radio-label"><input type="radio" name="acq_letterLanguage_${r}" value="Hindi"     ${rowData.letterLanguage==='Hindi'?'checked':''}     onchange="saveRadioValue(this)"> Hindi</label>
+                    <label class="radio-label"><input type="radio" name="acq_letterLanguage_${r}" value="English"  ${rowData.letterLanguage==='English'?'checked':''}  onchange="saveRadioValue(this)"> English</label>
+                    <label class="radio-label"><input type="radio" name="acq_letterLanguage_${r}" value="Bilingual" ${rowData.letterLanguage==='Bilingual'?'checked':''} onchange="saveRadioValue(this)"> Bilingual</label>
+                </div>
+            </td>
+            <td>
+                <div class="radio-cell" data-row="${r}" data-field="zone">
+                    <label class="radio-label"><input type="checkbox" name="acq_zone_${r}" value="Zone A" ${chk('zone','Zone A')} onchange="enforceCheckboxLimit(this, 2)"> Zone A</label>
+                    <label class="radio-label"><input type="checkbox" name="acq_zone_${r}" value="Zone B" ${chk('zone','Zone B')} onchange="enforceCheckboxLimit(this, 2)"> Zone B</label>
+                    <label class="radio-label"><input type="checkbox" name="acq_zone_${r}" value="Zone C" ${chk('zone','Zone C')} onchange="enforceCheckboxLimit(this, 2)"> Zone C</label>
+                </div>
+            </td>
+            <td>
                 <div class="radio-cell" data-row="${r}" data-field="acquisitionMethod">
-                    <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${r}" value="Speed Post"      ${chk('acquisitionMethod','Speed Post')}      onchange="saveRadioValue(this)"> Speed Post</label>
-                    <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${r}" value="Registered Post" ${chk('acquisitionMethod','Registered Post')} onchange="saveRadioValue(this)"> Registered Post</label>
-                    <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${r}" value="Hand Delivery"   ${chk('acquisitionMethod','Hand Delivery')}   onchange="saveRadioValue(this)"> Hand Delivery</label>
-                    <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${r}" value="Email"          ${chk('acquisitionMethod','Email')}          onchange="saveRadioValue(this)"> Email</label>
-                    <label class="radio-label"><input type="radio" name="acq_acquisitionMethod_${r}" value="E-file"         ${chk('acquisitionMethod','E-file')}         onchange="saveRadioValue(this)"> E-file</label>
+                    <label class="radio-label"><input type="checkbox" name="acq_acquisitionMethod_${r}" value="Speed Post"      ${chk('acquisitionMethod','Speed Post')}      onchange="enforceCheckboxLimit(this, 3)"> Speed Post</label>
+                    <label class="radio-label"><input type="checkbox" name="acq_acquisitionMethod_${r}" value="Registered Post" ${chk('acquisitionMethod','Registered Post')} onchange="enforceCheckboxLimit(this, 3)"> Registered Post</label>
+                    <label class="radio-label"><input type="checkbox" name="acq_acquisitionMethod_${r}" value="Hand Delivery"   ${chk('acquisitionMethod','Hand Delivery')}   onchange="enforceCheckboxLimit(this, 3)"> Hand Delivery</label>
+                    <label class="radio-label"><input type="checkbox" name="acq_acquisitionMethod_${r}" value="Email"          ${chk('acquisitionMethod','Email')}          onchange="enforceCheckboxLimit(this, 3)"> Email</label>
+                    <label class="radio-label"><input type="checkbox" name="acq_acquisitionMethod_${r}" value="E-file"         ${chk('acquisitionMethod','E-file')}         onchange="enforceCheckboxLimit(this, 3)"> E-file</label>
                 </div>
             </td>
         `;
@@ -1902,3 +1925,12 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log(' PDF button listener attached');
     }
 });
+function enforceCheckboxLimit(element, limit) {
+    const parent = element.closest('.radio-cell');
+    const checkedBoxes = parent.querySelectorAll('input[type="checkbox"]:checked');
+    if (checkedBoxes.length > limit) {
+        element.checked = false;
+        alert('You can select a maximum of ' + limit + ' options.');
+    }
+    saveRadioValue(element);
+}
